@@ -1,15 +1,13 @@
 ---
-title: 'Lab 1: Data Science Tools'
-subtitle: 'Exploring Streamflow Across the Colorado River Basin'
-author:
-  name: Kate McCarthy
-  email: katherine.mccarthy@colostate.edu
+title: "Lab 1: Data Science Tools"
+subtitle: "Exploring Streamflow Across the Colorado River Basin" 
+author: 
+  name: "Kate McCarthy"
+  email: "katherine.mccarthy@colostate.edu"
 format:
-  html:
+  html: 
+    toc: true 
     code-fold: true
-    toc: true
-    include-before-body: ../slides/header.html
-    include-after-body: ../slides/footer-annotations.html
 ---
 
 ```{r}
@@ -36,26 +34,6 @@ In January 2023, the federal government announced the first-ever Tier 3 shortage
 The Colorado River Basin supplies drinking water to 40 million people across 7 US states, irrigates 5 million acres of farmland, and is governed by one of the oldest and most contested water rights agreements in American history — the Colorado River Compact of 1922. Understanding how streamflow varies across this system is not an academic exercise. It is the daily work of water managers, federal agencies, tribal water rights holders, and scientists navigating a river under compounding stress from drought, overallocation, and climate change.
 
 In this lab you will work with real streamflow records pulled directly from the **USGS National Water Information System (NWIS)** — the same federal system water managers query every morning. You will build a complete analytical pipeline: from raw API call to normalized comparisons, threshold detection, basin-wide trend visualization, and a predictive model of the Compact's key accounting point.
-
----
-
-# Set-up {#setup}
-
-## Repository
-
-1. Create a new repository called `csu-523c` on GitHub
-2. Clone it to your `~/github/` directory
-3. Open the project in RStudio (`File → Open Project`)
-4. Download this labs qmd file [here](lab-01.qmd) into your repo
-5. Add your information to the yaml
-
-```yaml
----
-...
-
-...
----
-```
 
 ## Libraries
 
@@ -894,12 +872,12 @@ residual_plot
 > The outlier water year visible in the scatter plot is 1983. The model significanyl underpredicted this year because it was a particularly wet year, with high flow levels that were not commonly seen in the data used to build the model. The residuals appear to be mostly centered around zero, but there is a right tail that is concerning. This implies that the model struggles with predicting flows during really wet years. To improve this model, adding spring snowpack upstream as a predictor would help better predict on above-average wet years. Also, adding an infiltration rate predictor would help train the model on flows compared soil conditions. 
 
 ---
+
 # References 
 
 Doesken, Nolan J, Thomas B McKee, and Department of Atmospheric Science Colorado Climate Center. Colorado Climate Summary Water-Year Series: October 1983-September 1984. Colorado State University. Libraries, 1985. Print.
 
 Lukas, Jeff et al. Colorado River Basin Climate and Hydrology: State of the Science. Boulder, Colo: Western Water Assessment, University of Colorado Boulder, Cooperative Institute for Research in Environmental Sciences, 2020. Web.
-
 
 ---
 
@@ -925,39 +903,3 @@ In this lab you built a complete analytical pipeline for one of the most consequ
 - **Evaluated** model assumptions and identified the outlier year the model couldn't predict
 
 Every tool — `dplyr`, `ggplot2`, `zoo`, `patchwork`, `broom`, `flextable` — recurs in work you will inevitabbly do. The key is that the workflow is always the same: get → tidy → explore → model → communicate.
-
----
-
-# Rubric
-
-| Question | Topic | Points |
-|----------|-------|--------|
-| Q1 | Daily conditions report | 10 |
-| Q2 | Basin metadata join | 10 |
-| Q3 | Per-unit-area normalization | 10 |
-| Q4 | Low-flow threshold monitoring | 20 |
-| Q5 | Annual water year summary | 10 |
-| Q6 | Basin-wide trend analysis | 15 |
-| Q7 | Moving center of drought | 15 |
-| Q8 | Seasonal regimes + peak timing | 15 |
-| Q9 | Predictive model | 15 |
-| Q10 | Model evaluation | 10 |
-| Well-structured, legible Qmd | — | 10 |
-| Deployed as a webpage | — | 10 |
-| **Total** | | **150** |
-
----
-
-**Grading key (brief):**
-- **Correctness (primary):** calculations, joins, and checks — e.g., Q2 join verification and Q4 rolling mean logic.
-- **Reproducibility:** code runs end-to-end, used parameter objects (`my.date`), and included any small checks or assertions.
-- **Clarity & Presentation:** readable code, labeled tables/plots, captions for `flextable` outputs, and a clear 1-paragraph interpretation.
-
-# Submission
-
-1. Render: `quarto render lab-01.qmd`
-2. Push: `git add -A && git commit -m "lab 1 complete" && git push`
-3. Activate GitHub Pages: **GitHub → Settings → Pages → Deploy from branch → main**
-4. Submit your live URL to Canvas: `https://USERNAME.github.io/csu-523c/lab-01.html`
-
-Add this project to your personal website with a brief description — it counts toward end-of-semester extra credit.

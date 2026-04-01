@@ -1,3 +1,2 @@
-project: 
-  type: website
+project:
   output-dir: docs
