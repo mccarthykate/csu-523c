@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Kate McCarthy">
+
+<title>Lab 1: Data Science Tools</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ff63373b1067ca6f91cf1456aa1f00a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-search-results"></div>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Set-up</a>
+  <ul class="collapse">
+  <li><a href="#repository" id="toc-repository" class="nav-link" data-scroll-target="#repository">Repository</a></li>
+  <li><a href="#libraries" id="toc-libraries" class="nav-link" data-scroll-target="#libraries">Libraries</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
+  </ul></li>
+  <li><a href="#q1" id="toc-q1" class="nav-link" data-scroll-target="#q1"><strong>Question 1</strong>: Daily Conditions Report</a></li>
+  <li><a href="#q2" id="toc-q2" class="nav-link" data-scroll-target="#q2"><strong>Question 2</strong>: Basin Metadata Join</a>
+  <ul class="collapse">
+  <li><a href="#the-anatomy-of-a-join" id="toc-the-anatomy-of-a-join" class="nav-link" data-scroll-target="#the-anatomy-of-a-join">The anatomy of a join</a></li>
+  <li><a href="#graduate-expectations" id="toc-graduate-expectations" class="nav-link" data-scroll-target="#graduate-expectations">Graduate expectations</a></li>
+  </ul></li>
+  <li><a href="#q3" id="toc-q3" class="nav-link" data-scroll-target="#q3"><strong>Question 3</strong>: Per-Unit-Area Normalization</a></li>
+  <li><a href="#q4" id="toc-q4" class="nav-link" data-scroll-target="#q4"><strong>Question 4</strong>: Low-Flow Threshold Monitoring</a></li>
+  <li><a href="#q5" id="toc-q5" class="nav-link" data-scroll-target="#q5"><strong>Question 5</strong>: Annual Water Year Summary</a></li>
+  <li><a href="#q6" id="toc-q6" class="nav-link" data-scroll-target="#q6"><strong>Question 6</strong>: Basin-Wide Trend Analysis</a></li>
+  <li><a href="#q7" id="toc-q7" class="nav-link" data-scroll-target="#q7"><strong>Question 7</strong>: The Moving Center of Drought</a></li>
+  <li><a href="#q8" id="toc-q8" class="nav-link" data-scroll-target="#q8"><strong>Question 8</strong>: Seasonal Regimes and Peak Timing</a></li>
+  <li><a href="#q9" id="toc-q9" class="nav-link" data-scroll-target="#q9"><strong>Question 9</strong>: Predicting Lees Ferry from Upstream Conditions</a>
+  <ul class="collapse">
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data Preparation</a></li>
+  <li><a href="#model-building" id="toc-model-building" class="nav-link" data-scroll-target="#model-building">Model Building</a></li>
+  </ul></li>
+  <li><a href="#q10" id="toc-q10" class="nav-link" data-scroll-target="#q10"><strong>Question 10</strong>: Model Evaluation</a></li>
+  <li><a href="#going-further-ungraded" id="toc-going-further-ungraded" class="nav-link" data-scroll-target="#going-further-ungraded">Going Further (ungraded)</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#rubric" id="toc-rubric" class="nav-link" data-scroll-target="#rubric">Rubric</a></li>
+  <li><a href="#submission" id="toc-submission" class="nav-link" data-scroll-target="#submission">Submission</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 1: Data Science Tools</h1>
+<p class="subtitle lead">Exploring Streamflow Across the Colorado River Basin</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kate McCarthy <a href="mailto:katherine.mccarthy@colostate.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/colorado-river.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In January 2023, the federal government announced the first-ever Tier 3 shortage on the Colorado River — triggering mandatory cuts to Arizona, Nevada, and Mexico. Those cuts were calculated from streamflow records like the ones you are about to pull.</p>
+<p>The Colorado River Basin supplies drinking water to 40 million people across 7 US states, irrigates 5 million acres of farmland, and is governed by one of the oldest and most contested water rights agreements in American history — the Colorado River Compact of 1922. Understanding how streamflow varies across this system is not an academic exercise. It is the daily work of water managers, federal agencies, tribal water rights holders, and scientists navigating a river under compounding stress from drought, overallocation, and climate change.</p>
+<p>In this lab you will work with real streamflow records pulled directly from the <strong>USGS National Water Information System (NWIS)</strong> — the same federal system water managers query every morning. You will build a complete analytical pipeline: from raw API call to normalized comparisons, threshold detection, basin-wide trend visualization, and a predictive model of the Compact’s key accounting point.</p>
+<hr>
+<section id="setup" class="level1">
+<h1>Set-up</h1>
+<section id="repository" class="level2">
+<h2 class="anchored" data-anchor-id="repository">Repository</h2>
+<ol type="1">
+<li>Create a new repository called <code>csu-523c</code> on GitHub</li>
+<li>Clone it to your <code>~/github/</code> directory</li>
+<li>Open the project in RStudio (<code>File → Open Project</code>)</li>
+<li>Download this labs qmd file <a href="./lab-01.html">here</a> into your repo</li>
+<li>Add your information to the yaml</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="libraries" class="level2">
+<h2 class="anchored" data-anchor-id="libraries">Libraries</h2>
+<p>Install and load the following packages. If any are missing, run <code>install.packages("packagename")</code> first:</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>pacman::p_load()</code> installs any missing packages and loads them in one step — convenient for students setting up dependencies.</p>
+</div>
+</div>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>We will use the <code>dataRetrieval</code> package — developed and maintained by the USGS — to pull 44 years of daily mean discharge from 7 long-record gauges spanning the Colorado River’s main stem and major tributaries.</p>
+<p>The USGS parameter code for discharge is <code>00060</code> (cubic feet per second). The statistic code <code>00003</code> is the daily mean value. Under the hood, <code>dataRetrieval</code> constructs and queries the same REST API URL we explored in lecture:</p>
+<pre><code>https://waterservices.usgs.gov/nwis/dv/?sites=09380000&amp;parameterCd=00060&amp;statCd=00003</code></pre>
+<p>The data can be grabbed below!</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>gauges <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>site_no,     <span class="sc">~</span>name,                           <span class="sc">~</span>state,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09380000"</span>,   <span class="st">"Colorado R at Lees Ferry"</span>,      <span class="st">"AZ"</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09163500"</span>,   <span class="st">"Colorado R near CO-UT border"</span>,  <span class="st">"CO"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09085000"</span>,   <span class="st">"Colorado R at Glenwood Springs"</span>,<span class="st">"CO"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09306500"</span>,   <span class="st">"White R near Watson"</span>,           <span class="st">"UT"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09379500"</span>,   <span class="st">"San Juan R near Bluff"</span>,         <span class="st">"UT"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09402500"</span>,   <span class="st">"Little Colorado R near Cameron"</span>,<span class="st">"AZ"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"09423000"</span>,   <span class="st">"Colorado R below Hoover Dam"</span>,   <span class="st">"NV"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>raw <span class="ot">&lt;-</span> <span class="fu">readNWISdv</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">siteNumbers =</span> gauges<span class="sc">$</span>site_no,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameterCd =</span> <span class="st">"00060"</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">startDate   =</span> <span class="st">"1980-01-01"</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">endDate     =</span> <span class="st">"2023-12-31"</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">renameNWISColumns</span>() <span class="sc">|&gt;</span>              <span class="co"># renames X_00060_00003 → Flow</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(gauges, <span class="at">by =</span> <span class="st">"site_no"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(site_no, name, state, Date, Flow)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 109,426
+Columns: 5
+$ site_no &lt;chr&gt; "09085000", "09085000", "09085000", "09085000", "09085000", "0…
+$ name    &lt;chr&gt; "Colorado R at Glenwood Springs", "Colorado R at Glenwood Spri…
+$ state   &lt;chr&gt; "CO", "CO", "CO", "CO", "CO", "CO", "CO", "CO", "CO", "CO", "C…
+$ Date    &lt;date&gt; 1980-01-01, 1980-01-02, 1980-01-03, 1980-01-04, 1980-01-05, 1…
+$ Flow    &lt;dbl&gt; 620, 605, 582, 582, 575, 590, 582, 582, 582, 590, 560, 598, 59…</code></pre>
+</div>
+</div>
+<p>Note: this chunk is cached (<code>cache = TRUE</code>). If you change the data-pull arguments and need fresh data, set <code>cache = FALSE</code> temporarily or delete the <code>_cache/</code> directory and re-render to force a new download.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What does <code>glimpse()</code> tell you?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Before doing anything with a new dataset, always check: Does the row count make sense? Are data types correct (<code>Date</code> should be <code>&lt;date&gt;</code>, <code>Flow</code> should be <code>&lt;dbl&gt;</code>)? Are there obvious NAs or impossible values? For ~7 gauges × 44 years × 365 days you should expect roughly 112,000 rows.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="q1" class="level1">
+<h1><strong>Question 1</strong>: Daily Conditions Report</h1>
+<p>You are a water resources analyst. Each morning you deliver a reproducible snapshot of current conditions to Colorado River Compact stakeholders. The analysis must be re-runnable on any date with a single change — that requires building it around <strong>parameter objects</strong> rather than hardcoded values.</p>
+<p><strong>a.</strong> Create a <code>my.date</code> parameter object set to the last day of water year 2023 (September 30, 2023). Ensure it is stored as a proper <code>Date</code> object, not a character string.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>as.Date()</code> converts a character string to a Date. R stores dates internally as days since 1970-01-01, enabling date arithmetic (<code>my.date - 7</code> = one week earlier) and use in <code>filter()</code> comparisons. Hint: use <code>as.Date()</code> to convert strings to <code>Date</code> objects and confirm with <code>class()</code> before using date arithmetic or <code>filter()</code>.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>my.date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2023-09-30"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(my.date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Date"</code></pre>
+</div>
+</div>
+<p><strong>b.</strong> Compute the <strong>day-over-day change in discharge</strong> for each gauge — how much flow rose or fell compared to the previous day. Store this as a new column called <code>flow_delta</code>. This tells you whether conditions are improving or deteriorating, which is often more actionable than the raw level alone.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>raw_delta <span class="ot">&lt;-</span> raw <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Date, name) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(name) <span class="sc">%&gt;%</span> <span class="co">#group by gauge to get the delta at each site for each day</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">flow_delta =</span> Flow <span class="sc">-</span> <span class="fu">lag</span>(Flow)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(raw) <span class="sc">==</span> <span class="fu">nrow</span>(raw_delta) <span class="co">#check to make sure same number of rows </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p><strong>c.</strong> Filter to <code>my.date</code> and produce <strong>two formatted tables</strong> using <code>flextable</code>:</p>
+<ul>
+<li><strong>Table 1</strong>: The 5 gauges with the <strong>highest discharge</strong> — where is flow greatest right now?</li>
+<li><strong>Table 2</strong>: The 5 gauges with the <strong>greatest day-over-day increase</strong> — where is flow rising fastest?</li>
+</ul>
+<p>Both tables should have clear column names, rounded numbers, and descriptive captions using <code>flextable</code> (see tip).</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Introducing <code>flextable</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>flextable</code> creates publication-quality HTML tables directly from data frames.</p>
+<p>Hint: use <code>flextable()</code> with <code>set_header_labels()</code>, <code>set_caption()</code>, and <code>autofit()</code> for clean tables. Use <code>slice_max()</code> to select top <code>n</code> rows and <code>round()</code> to tidy numeric columns before rendering.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>raw_delta_mydate <span class="ot">&lt;-</span> raw_delta <span class="sc">%&gt;%</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">==</span> my.date)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#table 1</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="do">##select data for table</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>highest_discharge_mydate <span class="ot">&lt;-</span> raw_delta_mydate <span class="sc">%&gt;%</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(Flow, <span class="at">n =</span> <span class="dv">5</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">!</span>Flow) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span><span class="fu">c</span>(site_no, Date, flow_delta)) </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="do">##create table </span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>highest_discharge <span class="ot">&lt;-</span> <span class="fu">flextable</span>(highest_discharge_mydate) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_header_labels</span>(<span class="at">Flow =</span> <span class="st">"Discharge (cfs)"</span>, <span class="at">state =</span> <span class="st">"State"</span>, <span class="at">name =</span> <span class="st">"Site Name"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_caption</span>(<span class="at">caption =</span> <span class="st">"Top 5 Colorado River Gauges with the Highest Discharge on September 30th, 2023."</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(highest_discharge)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>a flextable object.
+col_keys: `name`, `state`, `Flow` 
+header has 1 row(s) 
+body has 5 row(s) 
+original dataset sample: 
+'data.frame':   5 obs. of  3 variables:
+ $ name : chr  "Little Colorado R near Cameron" "Colorado R at Lees Ferry" "Colorado R near CO-UT border" "San Juan R near Bluff" ...
+ $ state: chr  "AZ" "AZ" "CO" "UT" ...
+ $ Flow : num  6950 6570 3470 680 533</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#table 2</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="do">##select data for table</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>highest_increase_mydate <span class="ot">&lt;-</span> raw_delta_mydate <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(flow_delta, <span class="at">n =</span> <span class="dv">5</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">!</span>flow_delta) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span><span class="fu">c</span>(site_no, Date, Flow))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="do">##create table </span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>highest_increase <span class="ot">&lt;-</span> <span class="fu">flextable</span>(highest_increase_mydate) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_header_labels</span>(<span class="at">flow_delta =</span> <span class="st">"Change in Flow (cfs)"</span>, <span class="at">state =</span> <span class="st">"State"</span>, <span class="at">name =</span> <span class="st">"Site Name"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_caption</span>(<span class="at">caption =</span> <span class="st">"Top 5 Colorado River Gauges with the Highest Increase in Flow on September 30th, 2023."</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(highest_increase)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>a flextable object.
+col_keys: `name`, `state`, `flow_delta` 
+header has 1 row(s) 
+body has 5 row(s) 
+original dataset sample: 
+'data.frame':   5 obs. of  3 variables:
+ $ name      : chr  "Colorado R at Glenwood Springs" "White R near Watson" "Colorado R at Lees Ferry" "Little Colorado R near Cameron" ...
+ $ state     : chr  "CO" "UT" "AZ" "AZ" ...
+ $ flow_delta: num  8 -7 -10 -20 -50</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="q2" class="level1">
+<h1><strong>Question 2</strong>: Basin Metadata Join</h1>
+<p>Raw discharge numbers alone don’t tell the full story. Lees Ferry always carries more water than the San Juan at Bluff — but that is largely because it drains over <strong>111,000 square miles</strong> versus the San Juan’s ~23,000. To compare these sites meaningfully, we need each gauge’s drainage area. That information lives in a separate table and must be <strong>joined in</strong>.</p>
+<p>This is the core relational data problem: observations in one table, attributes in another, connected through a shared key. It is also one of the most error-prone operations in data science — not because the syntax is hard, but because bad joins fail silently.</p>
+<section id="the-anatomy-of-a-join" class="level2">
+<h2 class="anchored" data-anchor-id="the-anatomy-of-a-join">The anatomy of a join</h2>
+<p>Before writing a single <code>_join()</code> call, answer three questions:</p>
+<ol type="1">
+<li><strong>What is the key?</strong> Which column(s) connect the two tables?</li>
+<li><strong>What is the relationship?</strong> One-to-one, or one-to-many?</li>
+<li><strong>What happens to non-matching rows?</strong> Keep them (with NAs), or drop them?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>The (main) four joins — and when to use each
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Keeps rows from…</th>
+<th>Non-matching rows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>left_join(x, y)</code></td>
+<td>All of <code>x</code></td>
+<td><code>y</code> columns filled with <code>NA</code></td>
+</tr>
+<tr class="even">
+<td><code>right_join(x, y)</code></td>
+<td>All of <code>y</code></td>
+<td><code>x</code> columns filled with <code>NA</code></td>
+</tr>
+<tr class="odd">
+<td><code>inner_join(x, y)</code></td>
+<td>Only rows matching in <strong>both</strong></td>
+<td>Dropped entirely</td>
+</tr>
+<tr class="even">
+<td><code>full_join(x, y)</code></td>
+<td>Both <code>x</code> and <code>y</code></td>
+<td>NAs on whichever side has no match</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The most common mistake</strong>: using <code>inner_join</code> when you meant <code>left_join</code>. An inner join silently drops every row from <code>x</code> that has no match in <code>y</code> — your dataset shrinks and you may not notice until downstream results are wrong.</p>
+<p><strong>The second most common mistake</strong>: joining on a key that is not unique in one of the tables. If <code>site_no</code> appears twice in <code>site_meta</code>, every matching row in your flow data will be <strong>duplicated</strong> — your dataset grows and you may not notice.</p>
+<p>Both failures are invisible without explicit verification. For graduate-level work, in your write-up briefly justify the join type you chose, quantify any unmatched keys or duplicates you observed, and discuss possible data provenance reasons for mismatches.</p>
+</div>
+</div>
+<p><strong>a.</strong> Pull site metadata for all 7 gauges. Before joining, verify that <code>site_no</code> is actually unique in <code>site_meta</code> — a duplicated key will silently inflate your row count.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>site_meta <span class="ot">&lt;-</span> <span class="fu">readNWISsite</span>(gauges<span class="sc">$</span>site_no) <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    site_no,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    drain_area_va,   <span class="co"># drainage area in square miles</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    huc_cd,          <span class="co"># 8-digit HUC watershed code</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    dec_lat_va,      <span class="co"># latitude</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    dec_long_va      <span class="co"># longitude</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Is site_no actually unique? If any row shows n &gt; 1, the join will duplicate rows</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>site_meta <span class="sc">|&gt;</span> <span class="fu">count</span>(site_no) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] site_no n      
+&lt;0 rows&gt; (or 0-length row.names)</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Keys: primary and foreign
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A <strong>primary key</strong> uniquely identifies each row in its own table. <code>site_no</code> in <code>site_meta</code> is a primary key — exactly one row per gauge.</p>
+<p>A <strong>foreign key</strong> appears in another table to link observations back. <code>site_no</code> in your flow data is a foreign key — it appears thousands of times (once per day per gauge) and connects each observation to its gauge’s metadata.</p>
+<p>The join matches on this shared key. Because one gauge has many flow records, this is a <strong>one-to-many</strong> relationship — one <code>site_meta</code> row fans out to match thousands of flow rows.</p>
+</div>
+</div>
+<p><strong>b.</strong> Join <code>site_meta</code> to your flow data using <code>site_no</code> as the key. Use the join type that keeps <strong>all flow records</strong> regardless of whether metadata is available.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>join_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(raw, site_meta, <span class="at">by =</span> <span class="st">"site_no"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>c.</strong> Verify the join — this step is not optional:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#verify join </span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(join_data) <span class="sc">==</span> <span class="fu">nrow</span>(raw) <span class="co">#row count unchanged </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(join_data<span class="sc">$</span>drain_area_va)) <span class="sc">==</span> <span class="dv">0</span> <span class="co">#no unexpected NAs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>check_drain_area <span class="ot">&lt;-</span> join_data <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"Colorado R at Glenwood Springs"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(drain_area_va) <span class="co">#spot check a known value </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Always verify your joins — three checks, every time
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><code>nrow(result) == nrow(left_table)</code> — row count unchanged ✓</li>
+<li><code>sum(is.na(new_column)) == 0</code> — no unexpected NAs ✓</li>
+<li>Spot-check a known value — numbers are plausible ✓</li>
+</ol>
+<p>These checks cost 30 seconds and catch errors that would otherwise corrupt every downstream calculation silently. You will join data in every lab this semester. Consider, building this habit now.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="graduate-expectations" class="level2">
+<h2 class="anchored" data-anchor-id="graduate-expectations">Graduate expectations</h2>
+<p>This course is at the graduate level. In addition to producing correct code and outputs, your submission should:</p>
+<ul>
+<li>Briefly justify methodological choices (e.g., window lengths, alignment for rolling statistics, normalization approaches, and model structure). A short 3–5 sentence justification is sufficient.</li>
+<li>Include a simple sensitivity or validation check where appropriate (e.g., compare 7-day vs 14-day rolling windows; use leave-one-year-out cross-validation for the predictive model and report RMSE or MAE).</li>
+<li>Report basic uncertainty/robustness: how sensitive are your central conclusions to small changes in preprocessing or parameter choices?</li>
+<li>Cite one relevant source (paper, USGS stat documentation, or authoritative report) if you reference an established hydrological statistic (e.g., 7Q10 logic) or external dataset.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="q3" class="level1">
+<h1><strong>Question 3</strong>: Per-Unit-Area Normalization</h1>
+<p>Lees Ferry’s high discharge reflects its enormous watershed, not necessarily more intense rainfall or runoff. To compare <strong>runoff intensity</strong> across sites with different drainage areas, we normalize by expressing flow per unit area: cfs per square mile.</p>
+<p><strong>a.</strong> Add a <code>flow_per_sqmi</code> column to your data.frame.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>runoff_intensity <span class="ot">&lt;-</span> join_data <span class="sc">%&gt;%</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">flow_per_sqmi =</span> Flow<span class="sc">/</span>drain_area_va)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>b.</strong> On <code>my.date</code>, build a flextable showing <strong>both raw and normalized rankings</strong> side by side for all 7 gauges. Include columns for gauge name, raw discharge (cfs), drainage area (mi²), normalized flow (cfs/mi²), raw rank, and normalized rank. Sort by raw rank.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>runoff_intensity_mydate <span class="ot">&lt;-</span> runoff_intensity <span class="sc">%&gt;%</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">==</span> my.date, </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">!=</span> <span class="st">"Colorado R below Hoover Dam"</span>) <span class="sc">%&gt;%</span> <span class="co">#dropping site with NAs in data </span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(name, state, Flow, flow_per_sqmi, drain_area_va)) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">raw_rank =</span> <span class="fu">rank</span>(<span class="fu">desc</span>(Flow)), <span class="at">normalized_rank =</span> <span class="fu">rank</span>(<span class="fu">desc</span>(flow_per_sqmi))) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(raw_rank)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>runoff_intensity_table <span class="ot">&lt;-</span> <span class="fu">flextable</span>(runoff_intensity_mydate) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_header_labels</span>(<span class="at">name =</span> <span class="st">"Gauge Name"</span>, <span class="at">Flow =</span> <span class="st">"Raw Discharge (cfs)"</span>, <span class="at">flow_per_sqmi =</span> <span class="st">"Normalized Flow (cfs/mi²)"</span>, <span class="at">state =</span> <span class="st">"State"</span>, <span class="at">drain_area_va =</span> <span class="st">"Drainage Area (mi²)"</span>, <span class="at">raw_rank =</span> <span class="st">"Raw Ranking"</span>, <span class="at">normalized_rank =</span> <span class="st">"Normalized Ranking"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_caption</span>(<span class="at">caption =</span> <span class="st">"Colorado River Gauges Flow Data on September 30th, 2023, </span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="st">              Ranked by Raw and Normalized Flow"</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(runoff_intensity_table)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>a flextable object.
+col_keys: `name`, `state`, `Flow`, `flow_per_sqmi`, `drain_area_va`, `raw_rank`, `normalized_rank` 
+header has 1 row(s) 
+body has 6 row(s) 
+original dataset sample: 
+'data.frame':   6 obs. of  7 variables:
+ $ name           : chr  "Little Colorado R near Cameron" "Colorado R at Lees Ferry" "Colorado R near CO-UT border" "San Juan R near Bluff" ...
+ $ state          : chr  "AZ" "AZ" "CO" "UT" ...
+ $ Flow           : num  6950 6570 3470 680 533 329
+ $ flow_per_sqmi  : num  0.0491 0.0588 0.1944 0.0296 0.3668 ...
+ $ drain_area_va  : num  141600 111800 17849 23000 1453 ...
+ $ raw_rank       : num  1 2 3 4 5 6
+ $ normalized_rank: num  5 4 2 6 1 3
+ - attr(*, "url")= chr "https://waterservices.usgs.gov/nwis/dv/?site=09380000%2C09163500%2C09085000%2C09306500%2C09379500%2C09402500%2C"| __truncated__
+ - attr(*, "siteInfo")='data.frame':    7 obs. of  13 variables:
+  ..$ station_nm          : chr [1:7] "COLORADO RIVER BELOW DAVIS DAM, AZ-NV" "COLORADO RIVER NEAR GRAND CANYON, AZ" "COLORADO RIVER AT LEES FERRY, AZ" "SAN JUAN RIVER NEAR BLUFF, UT" ...
+  ..$ site_no             : chr [1:7] "09423000" "09402500" "09380000" "09379500" ...
+  ..$ agency_cd           : chr [1:7] "USGS" "USGS" "USGS" "USGS" ...
+  ..$ timeZoneOffset      : chr [1:7] "-07:00" "-07:00" "-07:00" "-07:00" ...
+  ..$ timeZoneAbbreviation: chr [1:7] "MST" "MST" "MST" "MST" ...
+  ..$ dec_lat_va          : num [1:7] 35.2 36.1 36.9 37.2 39.1 ...
+  ..$ dec_lon_va          : num [1:7] -115 -112 -112 -110 -109 ...
+  ..$ srs                 : chr [1:7] "EPSG:4326" "EPSG:4326" "EPSG:4326" "EPSG:4326" ...
+  ..$ siteTypeCd          : chr [1:7] "ST" "ST" "ST" "ST" ...
+  ..$ hucCd               : chr [1:7] "150301010302" "15010001" "140700061105" "14080205" ...
+  ..$ stateCd             : chr [1:7] "32" "04" "04" "49" ...
+  ..$ countyCd            : chr [1:7] "32003" "04005" "04005" "49037" ...
+  ..$ network             : chr [1:7] "NWIS" "NWIS" "NWIS" "NWIS" ...
+ - attr(*, "variableInfo")='data.frame':    1 obs. of  7 variables:
+  ..$ variableCode       : chr "00060"
+  ..$ variableName       : chr "Streamflow, ft&amp;#179;/s"
+  ..$ variableDescription: chr "Discharge, cubic feet per second"
+  ..$ valueType          : chr "Derived Value"
+  ..$ param_unit         : chr "ft3/s"
+  ..$ options            : chr "Mean"
+  ..$ noDataValue        : logi NA
+ - attr(*, "disclaimer")= chr "Provisional data are subject to revision. Go to http://waterdata.usgs.gov/nwis/help/?provisional for more information."
+ - attr(*, "statisticInfo")='data.frame':   1 obs. of  2 variables:
+  ..$ statisticCd  : chr "00003"
+  ..$ statisticName: chr "Mean"
+ - attr(*, "queryTime")= POSIXct[1:1], format: "2026-03-31 14:36:20"</code></pre>
+</div>
+</div>
+<p><strong>c.</strong> Answer in 2–3 sentences: (1) do the raw and normalized rankings differ, and if so, which gauge changes most dramatically? (2) Why does per-area normalization matter for comparing gauges in the Colorado Basin? (3) Name one analysis where you would use raw discharge and one where you would use normalized discharge.</p>
+<blockquote class="blockquote">
+<p>The raw and normalized rankings do differ. The Colorado River at Glenwood Springs changes the most dramatically, moving from 5th in the raw ranking to 1st in the normalized ranking. Per-area normalization matters for comparing gauges in the Colorado Basin because the drainage basins have dramatically different drainage areas. When comparing flow rates between gauges, it’s important to normalize by the drainage area to more accurately compare flow rates and hydrology of the basins based on their sizes. To analyze the total amount of water flowing through a basin after a storm event, it would be important to use the raw discharge data. However, if one way analyzing the flow rate to track infiltration rates after a storm, it would be important to use the normalized data so the differing sizes of the basins doens’t affect the analysis.</p>
+</blockquote>
+<hr>
+</section>
+<section id="q4" class="level1">
+<h1><strong>Question 4</strong>: Low-Flow Threshold Monitoring</h1>
+<p>Drought managers don’t just watch absolute flow levels — they watch how current conditions compare to <strong>historical norms</strong>. The standard operational metric is the <strong>7Q10</strong>: the lowest 7-day average flow expected to occur once in 10 years. We’ll use a related approach: flag when the 7-day rolling mean falls below the historical 10th percentile.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The USGS computes official low-flow statistics — including the 7Q10 — and makes them accessible via <code>dataRetrieval::readNWISstat()</code>. The thresholds you compute here will closely approximate those official values and follow the same logic water rights lawyers and regulators actually use.</p>
+</div>
+</div>
+<p><strong>a.</strong> For each gauge, compute the <strong>7-day rolling mean</strong> of daily discharge. Use <code>zoo::rollmean()</code> with <code>fill = NA</code> and <code>align = "right"</code> so each value represents the average of the current and 6 preceding days. If you havent see this function before, check out the documentation (<code>?rollmean</code>) and examples to understand how it works.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>low_flow_stats <span class="ot">&lt;-</span> raw <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(name) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rolling_mean =</span> <span class="fu">rollmean</span>(Flow, <span class="at">k =</span> <span class="dv">7</span>, <span class="at">align =</span> <span class="st">"right"</span>, <span class="at">fill =</span> <span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>b.</strong> Define a <strong>low-flow threshold</strong> for each gauge as the 10th percentile of its historical discharge during <strong>1980–2010</strong>. A flow that is critically low for Lees Ferry might be above average for the Little Colorado — thresholds must be site-specific.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>low_flow_threshold <span class="ot">&lt;-</span> low_flow_stats <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(name) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">"2010-12-31"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">threshold =</span> <span class="fu">quantile</span>(rolling_mean, <span class="at">probs =</span> <span class="fl">0.1</span>, <span class="at">na.rm =</span> T))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>c.</strong> Add a logical column <code>below_threshold</code> that is <code>TRUE</code> when the 7-day rolling mean is below the gauge’s 10th percentile threshold.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>low_flow_stats_threshold <span class="ot">&lt;-</span> low_flow_stats <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(low_flow_threshold, <span class="at">by =</span> <span class="st">"name"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(low_flow_stats_threshold, <span class="at">below_threshold =</span> rolling_mean <span class="sc">&lt;</span> threshold)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 109,426 × 8
+   site_no  name   state Date        Flow rolling_mean threshold below_threshold
+   &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt; &lt;date&gt;     &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt; &lt;lgl&gt;          
+ 1 09085000 Color… CO    1980-01-01   620          NA       430. NA             
+ 2 09085000 Color… CO    1980-01-02   605          NA       430. NA             
+ 3 09085000 Color… CO    1980-01-03   582          NA       430. NA             
+ 4 09085000 Color… CO    1980-01-04   582          NA       430. NA             
+ 5 09085000 Color… CO    1980-01-05   575          NA       430. NA             
+ 6 09085000 Color… CO    1980-01-06   590          NA       430. NA             
+ 7 09085000 Color… CO    1980-01-07   582         591.      430. FALSE          
+ 8 09085000 Color… CO    1980-01-08   582         585.      430. FALSE          
+ 9 09085000 Color… CO    1980-01-09   582         582.      430. FALSE          
+10 09085000 Color… CO    1980-01-10   590         583.      430. FALSE          
+# ℹ 109,416 more rows</code></pre>
+</div>
+</div>
+<p><strong>d.</strong> For <strong>Lees Ferry</strong> (site <code>09380000</code>) — the Compact’s primary accounting point — plot the 7-day rolling mean from 2000–2023 using <code>ggplot</code>. Shade periods below threshold in red and add a dashed horizontal reference line at the threshold.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#filter to site and dates</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>lowflow_leesferry <span class="ot">&lt;-</span> low_flow_stats_threshold <span class="sc">%&gt;%</span> </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(site_no <span class="sc">==</span> <span class="st">"09380000"</span>, Date <span class="sc">&gt;=</span> (<span class="fu">as.Date</span>(<span class="st">"2000-01-01"</span>)), Date <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">"2023-12-31"</span>)) </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#make graph </span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>lowflow_leesferry_plot <span class="ot">&lt;-</span> lowflow_leesferry <span class="sc">%&gt;%</span> </span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x=</span>Date, <span class="at">y=</span>rolling_mean)) <span class="sc">+</span> </span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">8824</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> <span class="dv">8824</span>), <span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Lees Ferry Flow from 2000-2023"</span>, </span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"7-day rolling mean plotted, with red shaded area considered 'below threshold.'"</span>, </span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Rolling Mean (cfs)"</span>, </span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Data from USGS gauges. Threshold limit set by the 10th percentile of 7-day rolling mean from 1980-2010."</span>) <span class="sc">+</span> </span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(lowflow_leesferry_plot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-01_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>e.</strong> How many days per year, on average, did Lees Ferry fall below its low-flow threshold in <strong>2000–2010</strong> vs.&nbsp;<strong>2011–2023</strong>? Produce a small summary table and answer in 2–3 sentences: (1) did below-threshold days increase or decrease? (2) Is this a shift in isolated dry years or a persistent baseline change? (3) What does this imply for Compact delivery obligations?</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>n_distinct(year(Date))</code> counts unique years in a group — useful for computing per-year averages across a multi-year period.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>count_lowflow_2000_2010 <span class="ot">&lt;-</span> lowflow_leesferry <span class="sc">%&gt;%</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">"2010-12-31"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">low_days =</span> <span class="fu">sum</span>(Flow <span class="sc">&lt;</span> threshold),</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">year_number =</span> <span class="dv">11</span>, </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">avg_lfdays_per_year =</span> low_days<span class="sc">/</span>year_number) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Period =</span> <span class="st">"2000-2010"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>count_lowflow_2011_2023 <span class="ot">&lt;-</span> lowflow_leesferry <span class="sc">%&gt;%</span> </span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">&gt;</span> <span class="fu">as.Date</span>(<span class="st">"2010-12-31"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">low_days =</span> <span class="fu">sum</span>(Flow <span class="sc">&lt;</span> threshold),</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">year_number =</span> <span class="dv">13</span>, </span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">avg_lfdays_per_year =</span> low_days<span class="sc">/</span>year_number) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Period =</span> <span class="st">"2011-2023"</span>)</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>full_join_leesferry <span class="ot">&lt;-</span> <span class="fu">full_join</span>(count_lowflow_2000_2010, count_lowflow_2011_2023)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>leesferry_summarytable <span class="ot">&lt;-</span> <span class="fu">flextable</span>(full_join_leesferry) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_header_labels</span>(<span class="at">low_days =</span> <span class="st">"Total Low-Flow Days"</span>, <span class="at">year_number =</span> <span class="st">"Length of Time Period"</span>, <span class="at">Period =</span> <span class="st">"Time Period"</span>, <span class="at">avg_lfdays_per_year =</span> <span class="st">"Average Number of Low Flow Days per Year"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_caption</span>(<span class="at">caption =</span> <span class="st">"Lees Ferry Low Flow-Days Averaged per Year from 2000-2023"</span>)</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(leesferry_summarytable)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>a flextable object.
+col_keys: `low_days`, `year_number`, `avg_lfdays_per_year`, `Period` 
+header has 1 row(s) 
+body has 2 row(s) 
+original dataset sample: 
+'data.frame':   2 obs. of  4 variables:
+ $ low_days           : int  661 652
+ $ year_number        : num  11 13
+ $ avg_lfdays_per_year: num  60.1 50.2
+ $ Period             : chr  "2000-2010" "2011-2023"</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The below-threshold days (on a yearly average) decreased from 2011-2023 compared to 2000-2010. It looks to be a shift in isolated dry years rather than a baseline change, because the low flow graph demonstrates a pretty consistent number of low flow years in both time periods.</p>
+</blockquote>
+<p><em>FINISH ANSWERING THIS QUESTION LATER AND CITE A SOURCE</em></p>
+<hr>
+</section>
+<section id="q5" class="level1">
+<h1><strong>Question 5</strong>: Annual Water Year Summary</h1>
+<p>Calendar years are a poor fit for western US hydrology. The <strong>water year</strong> (October 1 – September 30) captures the full snowmelt cycle: snowpack accumulates through winter, melts in spring, and by September the basin has recharged or drawn down for the year. Water year 2023 = October 1, 2022 through September 30, 2023.</p>
+<p><strong>a.</strong> Add <code>water_year</code> and <code>month</code> columns to your dataset. The water year is the calendar year of the ending September 30 — months October through December belong to the <em>next</em> water year.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>water_year_df <span class="ot">&lt;-</span> low_flow_stats_threshold  <span class="sc">%&gt;%</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">water_year =</span> <span class="fu">ifelse</span>(<span class="fu">month</span>(Date) <span class="sc">&gt;=</span> <span class="dv">10</span>, <span class="fu">year</span>(Date) <span class="sc">+</span> <span class="dv">1</span>, <span class="fu">year</span>(Date)),</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">month =</span> <span class="fu">month</span>(Date))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use <code>if_else()</code> to set <code>water_year</code> for Oct–Dec months.</p>
+</div>
+</div>
+<p><strong>b.</strong> For each gauge and water year, compute: total annual discharge, peak daily discharge, and number of days below the low-flow threshold.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>water_year_data <span class="ot">&lt;-</span> water_year_df <span class="sc">%&gt;%</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(name, water_year) <span class="sc">%&gt;%</span> </span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">annual_discharge =</span> <span class="fu">sum</span>(Flow),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">peak_daily_discharge =</span> <span class="fu">max</span>(Flow), </span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">low_flow_days =</span> <span class="fu">sum</span>(Flow<span class="sc">&lt;</span>threshold))  </span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(water_year_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 308 × 5
+# Groups:   name [7]
+   name           water_year annual_discharge peak_daily_discharge low_flow_days
+   &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;                &lt;dbl&gt;         &lt;int&gt;
+ 1 Colorado R at…       1980           432890                 7170             0
+ 2 Colorado R at…       1981           271835                 4110           104
+ 3 Colorado R at…       1982           469712                 5500             0
+ 4 Colorado R at…       1983           603893                11200            14
+ 5 Colorado R at…       1984           765741                 9510             0
+ 6 Colorado R at…       1985           644976                 9690             0
+ 7 Colorado R at…       1986           624342                 7020             0
+ 8 Colorado R at…       1987           460126                 5720             0
+ 9 Colorado R at…       1988           314527                 4090             6
+10 Colorado R at…       1989           303507                 2920            51
+# ℹ 298 more rows</code></pre>
+</div>
+</div>
+<p><strong>c.</strong> Plot <strong>total annual discharge at Lees Ferry</strong> by water year (1980–2023) as a bar chart. Color bars above the long-term median blue and bars below it red. Add a dashed horizontal reference line at the median.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hint: compute the long-term median and color bars by whether each year’s total is above or below it; add a dashed horizontal line at the median for reference.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>water_year_leesferry <span class="ot">&lt;-</span> water_year_data <span class="sc">%&gt;%</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"Colorado R at Lees Ferry"</span>, water_year <span class="sc">!=</span> <span class="st">"2024"</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">median_discharge =</span> <span class="fu">median</span>(annual_discharge))</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>wy_leesferry_plot <span class="ot">&lt;-</span> water_year_leesferry <span class="sc">%&gt;%</span> </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> water_year, <span class="at">y =</span> annual_discharge, <span class="at">fill =</span> annual_discharge <span class="sc">&lt;</span> median_discharge)) <span class="sc">+</span> </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> </span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"darkred"</span>, <span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"dodgerblue4"</span>),</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"Below Median"</span>, <span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"Above Median"</span>),</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Flow Status"</span>) <span class="sc">+</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept =</span> median_discharge), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Water Year"</span>, </span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Annual Discharge (cfs)"</span>, </span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Annual Discharge at Lees Ferry Gauge on the Colorado River"</span>, </span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="fu">str_wrap</span>(<span class="st">"Dashed line represents the median annual discharge, with blue bars being water years above the median, and red bars below. Data from USGS gauges."</span>, <span class="at">width =</span> <span class="dv">100</span>)) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>In 2–3 sentences: (1) describe the direction and approximate timing of any structural shift in the record, (2) identify one year that stands out as an exception to the dominant pattern and what you know about its cause, and (3) explain what this pattern means for Compact water accounting.</p>
+<blockquote class="blockquote">
+<p>…</p>
+</blockquote>
+<hr>
+</section>
+<section id="q6" class="level1">
+<h1><strong>Question 6</strong>: Basin-Wide Trend Analysis</h1>
+<p>A single gauge tells you about one location. To understand whether drought is consistent across the entire basin — or whether some tributaries are diverging from the main stem — you need to compare all gauges simultaneously on the same scale.</p>
+<p>Raw discharge can’t serve this purpose: a large-watershed gauge will always dominate. The solution is a <strong>standardized anomaly</strong> — each year’s flow expressed as standard deviations above or below the site’s own baseline mean:</p>
+<p><span class="math display">\[\text{anomaly} = \frac{\bar{Q}_{year} - \bar{Q}_{baseline}}{\sigma_{baseline}}\]</span></p>
+<p>where baseline = 1980–2010. An anomaly of –2 means “two standard deviations below normal for this gauge” — directly comparable to the same metric at any other gauge.</p>
+<p><strong>a.</strong> Compute the 1980–2010 baseline mean and SD per gauge. Join those stats back to the full annual data and compute the standardized anomaly for every gauge-year combination.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hint: summarize baseline mean and SD per gauge (1980–2010), join those stats to the annual table, and compute the standardized anomaly as (total_flow − baseline_mean)/baseline_sd. This is a join you’ve seen twice now — verify row counts and NAs after the join.</p>
+</div>
+</div>
+<p><strong>b.</strong> Visualize as a <strong>heatmap</strong>: water year on x, gauge name on y, fill = standardized anomaly. Use a diverging color scale centered at zero (blue = above average, red = below average).</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>geom_tile()</code> draws one rectangle per gauge-year. For the color scale, use a diverging color scale centered at zero (e.g., RdBu), clamp extreme values with <code>oob = scales::squish</code>, and wrap long gauge names to keep labels readable.</p>
+</div>
+</div>
+<p><strong>c.</strong> In 3–4 sentences: (1) describe whether the post-2000 drought signal appears across all gauges or only some, (2) identify two specific years that appear as basin-wide anomalies — one dry, one wet — and name the climate event that caused each, and (3) explain what simultaneous basin-wide anomalies tell you that a single-gauge record cannot.</p>
+<blockquote class="blockquote">
+<p>…</p>
+</blockquote>
+<hr>
+</section>
+<section id="q7" class="level1">
+<h1><strong>Question 7</strong>: The Moving Center of Drought</h1>
+<p>You have been asked to understand how the <em>geographic center</em> of streamflow has shifted over time. If drought has disproportionately reduced flow in the southern tributaries, the flow-weighted center of the basin should drift north — proportionally more flow is coming from northern headwater gauges. In exceptional snowmelt years it should shift back.</p>
+<p>We measure this with the <strong>flow-weighted mean position</strong>: each gauge’s coordinates are weighted by its fraction of total annual basin flow.</p>
+<p><span class="math display">\[\bar{X}_{year} = \frac{\sum (lon_i \times Q_i)}{\sum Q_i} \qquad \bar{Y}_{year} = \frac{\sum (lat_i \times Q_i)}{\sum Q_i}\]</span></p>
+<p><strong>a.</strong> Join gauge coordinates (<code>dec_lat_va</code>, <code>dec_long_va</code>) from <code>site_meta</code> to your annual summary. Compute the flow-weighted mean latitude and longitude for each water year.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hint: join coordinates from <code>site_meta</code> to the annual table, then compute weighted longitude/latitude per year as sum(coord * total_flow) / sum(total_flow). This is your third join — verify row counts, NAs, and spot-check known values.</p>
+</div>
+</div>
+<p>Note: mapping can use <code>map_data("state")</code>; if <code>map_data()</code> is not available install the <code>maps</code> package (<code>install.packages("maps")</code>) or use <code>ggplot2::map_data("state")</code> which provides equivalent polygons.</p>
+<p><strong>b.</strong> Create a two-panel figure using <code>patchwork</code>:</p>
+<ul>
+<li><strong>Left</strong>: western US base map with the weighted center plotted as points colored by water year (blue = early, red = recent) and connected by a path through time</li>
+<li><strong>Right</strong>: line plot of weighted mean latitude over time with a linear trend line</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hint: draw a western-US polygon basemap and overlay the annual weighted centers as a colored path and points; beside it, plot weighted latitude over time with a linear trend. Use a diverging color gradient for year progression and <code>patchwork</code> to combine panels.</p>
+<p>If you haven’t seen patchwork before, it allows you to combine multiple ggplots into a single figure with simple syntax: <code>plot1 + plot2</code> places them side by side; <code>plot1 / plot2</code> stacks them vertically assuming the package is loaded.</p>
+</div>
+</div>
+<p><strong>c.</strong> Your latitude time series should show two years where the weighted center spikes dramatically northward. Identify those two years and explain: (1) what climate event caused each spike, (2) what they have in common physically, and (3) what the long-term upward trend in weighted latitude suggests about which part of the basin is becoming proportionally more important to total flow — and why that matters for water managers downstream.</p>
+<blockquote class="blockquote">
+<p>…</p>
+</blockquote>
+<hr>
+</section>
+<section id="q8" class="level1">
+<h1><strong>Question 8</strong>: Seasonal Regimes and Peak Timing</h1>
+<p>Annual totals mask important seasonal structure. The Colorado Basin has two distinct runoff pulses: a <strong>snowmelt</strong> surge in spring (April–June) driven by Rocky Mountain headwater snowpack, and a <strong>monsoon</strong> pulse in late summer (July–September) driven by convective storms across the Arizona-New Mexico plateau. These seasons respond differently to climate forcing — and under warming, the snowmelt season is arriving earlier.</p>
+<p><strong>a.</strong> Add a <code>season</code> column using <code>case_when()</code>. Roughly we will define the seasons as follows:</p>
+<ul>
+<li><strong>Snowmelt</strong>: April–June (months 4–6)</li>
+<li><strong>Monsoon</strong>: July–September (months 7–9)</li>
+<li><strong>Low-flow</strong>: October–December (months 10–12)</li>
+<li><strong>Winter</strong>: January–March (months 1–3)</li>
+</ul>
+<p>Make <code>season</code> a factor with levels in hydrological order: Snowmelt, Monsoon, Low-flow, Winter.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hint: extract <code>month</code> from <code>Date</code> with <code>lubridate::month()</code>, create <code>season</code> with <code>case_when()</code> mapping month ranges to labels, then convert to a factor with explicit level ordering:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">month =</span> <span class="fu">month</span>(Date),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">season =</span> <span class="fu">case_when</span>(...),</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">season =</span> <span class="fu">factor</span>(season, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">'Snowmelt'</span>, <span class="st">'Monsoon'</span>, <span class="st">'Low-flow'</span>, <span class="st">'Winter'</span>))</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+<p><strong>b.</strong> Group by gauge, water year, and season. Summarize total seasonal discharge and normalized runoff per group.</p>
+<p><strong>c.</strong> For each gauge and water year, identify the <strong>date of peak 7-day mean flow</strong> and convert it to day-of-year. Plot peak day-of-year vs.&nbsp;water year for <strong>Lees Ferry</strong> with a linear trend line.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>slice_max(roll7, n = 1, with_ties = FALSE)</code> inside a <code>group_by(site_no, water_year)</code> block selects the single highest 7-day mean row per gauge per year. Then <code>lubridate::yday(Date)</code> converts to day-of-year (1–365).</p>
+</div>
+</div>
+<p><strong>d.</strong> In 2–3 sentences: (1) describe the direction and magnitude of the peak timing trend, (2) is it statistically visible or buried in noise? (3) What would a two-week earlier peak timing mean operationally for reservoir managers trying to capture spring runoff before it passes downstream?</p>
+<blockquote class="blockquote">
+<p>…</p>
+</blockquote>
+<hr>
+</section>
+<section id="q9" class="level1">
+<h1><strong>Question 9</strong>: Predicting Lees Ferry from Upstream Conditions</h1>
+<p>Lees Ferry is the <strong>Compact’s accounting point</strong> — the location where upper basin states must deliver flow to lower basin states. Predicting annual discharge at Lees Ferry from upstream conditions has direct operational value: managers can begin planning deliveries months before the water arrives.</p>
+<p>We’ll build a simple but physically grounded model: can Glenwood Springs (an upper Rocky Mountain gauge) predict Lees Ferry annual flow, and, does that relationship change by season?</p>
+<section id="data-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
+<p><strong>a.</strong> Build your model dataset through four sequential operations:</p>
+<ol type="1">
+<li>Filter <code>annual</code> to Lees Ferry; rename <code>total_flow</code> to <code>lees_flow</code></li>
+<li>Join annual Glenwood Springs flow (site <code>09085000</code>); rename to <code>glenwood_flow</code></li>
+<li>Join the <strong>dominant season</strong> at Lees Ferry per water year, the season with the highest total discharge</li>
+<li>Log-transform both flow variables</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The dominant season: within each water year, which season (Snowmelt, Monsoon, Low-flow, Winter) carried the most flow at Lees Ferry? Filter seasonal summaries to Lees Ferry, then <code>group_by(water_year) |&gt; slice_max(total_flow, n = 1)</code> to select one season per year.</p>
+<p>Then join that back to your Lees Ferry &amp; Glenwood annual table by <code>water_year</code>.</p>
+<p>This is your fourth join. <strong>Always verify</strong>: the final dataset should have ~44 rows (one per water year, 1980–2023), zero NAs in flow columns, and log-transformed values should be positive.</p>
+</div>
+</div>
+</section>
+<section id="model-building" class="level2">
+<h2 class="anchored" data-anchor-id="model-building">Model Building</h2>
+<p><strong>b.</strong> Fit a linear model predicting <code>log_lees</code> from <code>log_glenwood</code>, <code>season</code>, and their interaction, If you haven’t seen linear modeling in R, we will cover it in more detail latter in this course, but, the syntax is straightforward: <code>lm(response ~ predictor1 * predictor2, data = mydata)</code> fits a model with main effects and an interaction term. The interaction (<code>*</code>) allows the relationship between Glenwood and Lees to differ by season while a model without interaction (<code>lm(log_lees ~ log_glenwood + season)</code>) would assume the same Glenwood-Lees relationship in every season.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(log_lees <span class="sc">~</span> log_glenwood <span class="sc">*</span> season, <span class="at">data =</span> lees_model_data)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>c.</strong> In 3–4 sentences: (1) report the R² and state whether the overall model is statistically significant, (2) interpret the <code>log_glenwood</code> coefficient as an elasticity — what does it mean physically that the coefficient is greater than 1? (3) describe what the significant negative interaction terms tell you about the upstream-downstream relationship outside of Snowmelt season.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In a log-log model, the coefficient on <code>log_glenwood</code> is an <strong>elasticity</strong>: a coefficient of 1.8 means a 1% increase in Glenwood Springs flow is associated with a 1.8% increase at Lees Ferry. This super-linear amplification makes physical sense — flow accumulates from tributaries between the two gauges, so an above-average headwater year compounds as it moves downstream.</p>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>…</p>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="q10" class="level1">
+<h1><strong>Question 10</strong>: Model Evaluation</h1>
+<p>A model that fits well on average can still fail in predictable ways. Two core assumptions of linear regression are: predictions should be unbiased across the full range of fitted values, and residuals should be approximately normally distributed. Let’s check both — and look for the outlier year that the model cannot predict.</p>
+<p><strong>a.</strong> Use <code>broom::augment()</code> to produce a tidy data frame of predictions and residuals alongside the original data:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>aug <span class="ot">&lt;-</span> <span class="fu">augment</span>(mod, <span class="at">data =</span> lees_model_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Introducing <code>broom</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>broom</code> converts messy R model objects into tidy, pipeable data frames:</p>
+<ul>
+<li><code>augment(mod)</code> — adds <code>.fitted</code> (predictions) and <code>.resid</code> (residuals) to your data</li>
+<li><code>glance(mod)</code> — one-row summary of model fit: R², AIC, p-value</li>
+<li><code>tidy(mod)</code> — one-row-per-coefficient table with estimates and p-values</li>
+</ul>
+<p>Together these make model results as pipeable as any other data frame — straight into <code>ggplot</code> or <code>flextable</code>.</p>
+</div>
+</div>
+<p><strong>b.</strong> Create a <strong>predicted vs.&nbsp;actual scatter plot</strong>. Add a dashed 1:1 reference line (perfect prediction). Color points by <code>season</code>. Identify any point that sits noticeably off the line.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>geom_abline(slope = 1, intercept = 0, linetype = "dashed")</code> draws the 1:1 line. Points above it = underpredicted (actual &gt; predicted); points below = overpredicted.</p>
+</div>
+</div>
+<p><strong>c.</strong> Plot a <strong>histogram of the residuals</strong> with a vertical dashed line at zero.</p>
+<p><strong>d.</strong> In 3–4 sentences: (1) identify the outlier water year visible in your scatter plot. Which year is it and why did the model fail to predict it? (2) Do the residuals appear approximately normal, or is there a tail that concerns you? (3) Name two additional predictors that would most improve this model and explain the physical mechanism behind each.</p>
+<blockquote class="blockquote">
+<p>…</p>
+</blockquote>
+<hr>
+</section>
+<section id="going-further-ungraded" class="level1">
+<h1>Going Further (ungraded)</h1>
+<p>The model in Q9 predicts Lees Ferry from a single upstream gauge. <code>dataRetrieval</code> gives you access to hundreds more across the basin. Could a multi-gauge ensemble prediction outperform the single-gauge model? Could peak flows in March predict the following June’s flow at Lees Ferry months before snowmelt begins?</p>
+<p>These are real operational forecasting questions that USBR and state water agencies work on every year. The data is already in your hands to try!</p>
+<hr>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<p>In this lab you built a complete analytical pipeline for one of the most consequential river systems in North America:</p>
+<ul>
+<li><strong>Retrieved</strong> 44 years of daily streamflow directly from the USGS NWIS API using <code>dataRetrieval</code></li>
+<li><strong>Joined</strong> gauge metadata using relational keys — and verified every join</li>
+<li><strong>Normalized</strong> by drainage area to enable fair comparisons across the basin</li>
+<li><strong>Detected</strong> low-flow threshold exceedances using rolling statistics for operational drought monitoring</li>
+<li><strong>Aggregated</strong> by water year and season — the natural temporal units of western hydrology</li>
+<li><strong>Visualized</strong> basin-wide trends with a standardized anomaly heatmap and a flow-weighted spatial center analysis</li>
+<li><strong>Modeled</strong> the upstream-downstream relationship at the Compact’s accounting point</li>
+<li><strong>Evaluated</strong> model assumptions and identified the outlier year the model couldn’t predict</li>
+</ul>
+<p>Every tool — <code>dplyr</code>, <code>ggplot2</code>, <code>zoo</code>, <code>patchwork</code>, <code>broom</code>, <code>flextable</code> — recurs in work you will inevitabbly do. The key is that the workflow is always the same: get → tidy → explore → model → communicate.</p>
+<hr>
+</section>
+<section id="rubric" class="level1">
+<h1>Rubric</h1>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Topic</th>
+<th>Points</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Q1</td>
+<td>Daily conditions report</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>Q2</td>
+<td>Basin metadata join</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>Q3</td>
+<td>Per-unit-area normalization</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>Q4</td>
+<td>Low-flow threshold monitoring</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td>Q5</td>
+<td>Annual water year summary</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>Q6</td>
+<td>Basin-wide trend analysis</td>
+<td>15</td>
+</tr>
+<tr class="odd">
+<td>Q7</td>
+<td>Moving center of drought</td>
+<td>15</td>
+</tr>
+<tr class="even">
+<td>Q8</td>
+<td>Seasonal regimes + peak timing</td>
+<td>15</td>
+</tr>
+<tr class="odd">
+<td>Q9</td>
+<td>Predictive model</td>
+<td>15</td>
+</tr>
+<tr class="even">
+<td>Q10</td>
+<td>Model evaluation</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>Well-structured, legible Qmd</td>
+<td>—</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>Deployed as a webpage</td>
+<td>—</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td></td>
+<td><strong>150</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>Grading key (brief):</strong> - <strong>Correctness (primary):</strong> calculations, joins, and checks — e.g., Q2 join verification and Q4 rolling mean logic. - <strong>Reproducibility:</strong> code runs end-to-end, used parameter objects (<code>my.date</code>), and included any small checks or assertions. - <strong>Clarity &amp; Presentation:</strong> readable code, labeled tables/plots, captions for <code>flextable</code> outputs, and a clear 1-paragraph interpretation.</p>
+</section>
+<section id="submission" class="level1">
+<h1>Submission</h1>
+<ol type="1">
+<li>Render: <code>quarto render lab-01.qmd</code></li>
+<li>Push: <code>git add -A &amp;&amp; git commit -m "lab 1 complete" &amp;&amp; git push</code></li>
+<li>Activate GitHub Pages: <strong>GitHub → Settings → Pages → Deploy from branch → main</strong></li>
+<li>Submit your live URL to Canvas: <code>https://USERNAME.github.io/csu-523c/lab-01.html</code></li>
+</ol>
+<p>Add this project to your personal website with a brief description — it counts toward end-of-semester extra credit.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
