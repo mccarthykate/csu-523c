@@ -49,8 +49,7 @@ Install any missing packages with `install.packages("packagename")`, then load:
 ```{r}
 #| code-fold: false
 pacman::p_load(
-  tidyverse, sf, units, tigris, rnaturalearth, gghighlight, ggrepel, flextable
-)
+  tidyverse, sf, units, tigris, rnaturalearth, gghighlight, ggrepel, flextable, leaflet)
 
 options(tigris_use_cache = TRUE)
 ```
@@ -658,37 +657,40 @@ leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron, group = "Light Map") %>%
   addProviderTiles(providers$Esri.WorldImagery, group = "Satellite") %>%
   # state boundaries
-  addPolygons(data = states_4326, fillColor = "grey80", color = "black", weight = 1) %>%
-  # all city markers
+  addPolygons(data = states_4326, fillColor = "grey90", color = "black", weight = 1, group = "States") %>%
+  # all city markers - FIX: use mapply to apply function row-wise
   addCircleMarkers(data = cities_4326, group = "All Cities", radius = 3, weight = 1, 
                    color = "white", fillOpacity = 0.7, fillColor = ~palette(dist_to_border),
-                   popup = make_label(cities_4326),
+                   popup = mapply(make_label, split(cities_4326, seq(nrow(cities_4326))), SIMPLIFY = FALSE),
                    clusterOptions = markerClusterOptions(disableClusteringAtZoom = 6)
-                   ) %>%
+  ) %>%
   # equidistant zone markers
   addCircleMarkers(data = equidistant_mex_can_4326, group = "Equidistant Zone", 
                    radius = 3, weight = 1, fillOpacity = 0.7, color = "seagreen", 
-                   popup = make_label(equidistant_mex_can_4326)
-                   ) %>%
+                   popup = mapply(make_label, split(equidistant_mex_can_4326, seq(nrow(equidistant_mex_can_4326))), SIMPLIFY = FALSE)
+  ) %>%
   # border zone markers
   addCircleMarkers(data = border_cities_4326, 
                    group = "Border Zone", 
-                   radius = 3, weight = 1, fillOpacity = 0.7, color = "darkred",
-                   popup = make_label(border_cities_4326)
-                   ) %>%
-  # layer controls
+                   radius = 3, weight = 1, fillOpacity = 0.7, color = "dodgerblue4",
+                   popup = mapply(make_label, split(border_cities_4326, seq(nrow(border_cities_4326))), SIMPLIFY = FALSE)
+  ) %>%
+  # layer controls - FIX: use correct group names
   addLayersControl(
-    baseGroups = c("Base Map", "Satellite"),
-    overlayGroups = c("All Cities", "Equidistant Zone", "Border Zone"),
+    baseGroups = c("Light Map", "Satellite"),
+    overlayGroups = c("States", "All Cities", "Equidistant Zone", "Border Zone"),
     options = layersControlOptions(collapsed = FALSE)
-    ) #%>%
+  ) %>%
   # legends
+  addLegend(pal = palette, values = cities$dist_to_border, title = "Distance (km)", 
+            position = "bottomright") %>%
+  addLegend(colors = c("seagreen", "dodgerblue4"), labels = c("Equidistant Zone", "Border Zone"), 
+            opacity = 0.7, title = "Zones", position = "topleft")
   #addLegend(pal = palette, values = cities$dist_to_border, title = "Distance (km)", 
-          #  group = "All Cities", position = "bottomright") %>%
-  #addLegend(colors = c("seagreen", "darkred"), labels = c("Equidistant", "Border Zone"), opacity = 0.7, title = "Zones", 
-           # group = c("Equidistant Zone", "Border Zone"), position = "bottomright")
+           # group = "All Cities", position = "bottomright") %>%
+  #addLegend(colors = c("seagreen", "dodgerblue4"), labels = c("Equidistant Zone", "Border Zone"), 
+# opacity = 0.7, title = "Zones", position = "topleft")
 
-length(cities$dist_to_border)
 ```
 
 **Methods note**: In 2–3 sentences, describe the CRS transformation needed to convert from `eqdc` to `leaflet`-compatible coordinates, and any design choices you made to keep the map responsive (e.g., filtering, clustering, or simplifying geometries).
