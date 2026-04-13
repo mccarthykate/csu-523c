@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Lab 3: MAUP in Practice — Tessellations and Point-in-Polygon</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="lab-03_files/libs/clipboard/clipboard.min.js"></script>
+<script src="lab-03_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="lab-03_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="lab-03_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="lab-03_files/libs/quarto-html/popper.min.js"></script>
+<script src="lab-03_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="lab-03_files/libs/quarto-html/anchor.min.js"></script>
+<link href="lab-03_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="lab-03_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="lab-03_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="lab-03_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="lab-03_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="lab-03_files/libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="lab-03_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a>
+  <ul class="collapse">
+  <li><a href="#graduate-level-expectations" id="toc-graduate-level-expectations" class="nav-link" data-scroll-target="#graduate-level-expectations">Graduate-Level Expectations</a>
+  <ul class="collapse">
+  <li><a href="#libraries" id="toc-libraries" class="nav-link" data-scroll-target="#libraries">Libraries</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#question-1" id="toc-question-1" class="nav-link" data-scroll-target="#question-1">Question 1:</a>
+  <ul class="collapse">
+  <li><a href="#step-1.1" id="toc-step-1.1" class="nav-link" data-scroll-target="#step-1.1">Step 1.1</a></li>
+  <li><a href="#step-1.2" id="toc-step-1.2" class="nav-link" data-scroll-target="#step-1.2">Step 1.2</a></li>
+  <li><a href="#step-1.3" id="toc-step-1.3" class="nav-link" data-scroll-target="#step-1.3">Step 1.3</a></li>
+  <li><a href="#step-1.4" id="toc-step-1.4" class="nav-link" data-scroll-target="#step-1.4">Step 1.4</a></li>
+  <li><a href="#step-1.5" id="toc-step-1.5" class="nav-link" data-scroll-target="#step-1.5">Step 1.5</a></li>
+  <li><a href="#step-1.6" id="toc-step-1.6" class="nav-link" data-scroll-target="#step-1.6">Step 1.6</a></li>
+  <li><a href="#step-1.7" id="toc-step-1.7" class="nav-link" data-scroll-target="#step-1.7">Step 1.7</a></li>
+  </ul></li>
+  <li><a href="#question-2" id="toc-question-2" class="nav-link" data-scroll-target="#question-2">Question 2:</a>
+  <ul class="collapse">
+  <li><a href="#step-2.1" id="toc-step-2.1" class="nav-link" data-scroll-target="#step-2.1">Step 2.1</a></li>
+  <li><a href="#step-2.2" id="toc-step-2.2" class="nav-link" data-scroll-target="#step-2.2">Step 2.2</a></li>
+  <li><a href="#step-2.3" id="toc-step-2.3" class="nav-link" data-scroll-target="#step-2.3">Step 2.3</a></li>
+  <li><a href="#step-2.4" id="toc-step-2.4" class="nav-link" data-scroll-target="#step-2.4">Step 2.4</a></li>
+  <li><a href="#step-2.5" id="toc-step-2.5" class="nav-link" data-scroll-target="#step-2.5">Step 2.5</a></li>
+  </ul></li>
+  <li><a href="#question-3-dam-distribution-analysis-tessellation-selection" id="toc-question-3-dam-distribution-analysis-tessellation-selection" class="nav-link" data-scroll-target="#question-3-dam-distribution-analysis-tessellation-selection">Question 3: Dam Distribution Analysis &amp; Tessellation Selection</a>
+  <ul class="collapse">
+  <li><a href="#step-3.1" id="toc-step-3.1" class="nav-link" data-scroll-target="#step-3.1">Step 3.1</a></li>
+  <li><a href="#step-3.2" id="toc-step-3.2" class="nav-link" data-scroll-target="#step-3.2">Step 3.2</a></li>
+  <li><a href="#step-3.3" id="toc-step-3.3" class="nav-link" data-scroll-target="#step-3.3">Step 3.3</a></li>
+  <li><a href="#step-3.4" id="toc-step-3.4" class="nav-link" data-scroll-target="#step-3.4">Step 3.4</a></li>
+  <li><a href="#step-3.5" id="toc-step-3.5" class="nav-link" data-scroll-target="#step-3.5">Step 3.5</a></li>
+  <li><a href="#step-3.6" id="toc-step-3.6" class="nav-link" data-scroll-target="#step-3.6">Step 3.6</a></li>
+  </ul></li>
+  <li><a href="#question-4" id="toc-question-4" class="nav-link" data-scroll-target="#question-4">Question 4</a>
+  <ul class="collapse">
+  <li><a href="#step-4.1" id="toc-step-4.1" class="nav-link" data-scroll-target="#step-4.1">Step 4.1</a></li>
+  <li><a href="#step-4.2" id="toc-step-4.2" class="nav-link" data-scroll-target="#step-4.2">Step 4.2</a></li>
+  <li><a href="#step-4.3" id="toc-step-4.3" class="nav-link" data-scroll-target="#step-4.3">Step 4.3</a></li>
+  </ul></li>
+  <li><a href="#question-5-spatial-correlation-of-dam-attributes-introduction-to-spatial-regression" id="toc-question-5-spatial-correlation-of-dam-attributes-introduction-to-spatial-regression" class="nav-link" data-scroll-target="#question-5-spatial-correlation-of-dam-attributes-introduction-to-spatial-regression">Question 5: Spatial Correlation of Dam Attributes — Introduction to Spatial Regression</a>
+  <ul class="collapse">
+  <li><a href="#step-5.1" id="toc-step-5.1" class="nav-link" data-scroll-target="#step-5.1">Step 5.1</a></li>
+  <li><a href="#step-5.2" id="toc-step-5.2" class="nav-link" data-scroll-target="#step-5.2">Step 5.2</a></li>
+  <li><a href="#step-5.3" id="toc-step-5.3" class="nav-link" data-scroll-target="#step-5.3">Step 5.3</a></li>
+  <li><a href="#step-5.4" id="toc-step-5.4" class="nav-link" data-scroll-target="#step-5.4">Step 5.4</a></li>
+  <li><a href="#step-5.5-optional-hypothesis-checkpoint" id="toc-step-5.5-optional-hypothesis-checkpoint" class="nav-link" data-scroll-target="#step-5.5-optional-hypothesis-checkpoint">Step 5.5 (Optional) — Hypothesis Checkpoint</a></li>
+  </ul></li>
+  <li><a href="#question-6-local-spatial-autocorrelation-lisa-mapping-hotspots-and-coldspots" id="toc-question-6-local-spatial-autocorrelation-lisa-mapping-hotspots-and-coldspots" class="nav-link" data-scroll-target="#question-6-local-spatial-autocorrelation-lisa-mapping-hotspots-and-coldspots">Question 6: Local Spatial Autocorrelation (LISA) — Mapping Hotspots and Coldspots</a>
+  <ul class="collapse">
+  <li><a href="#step-6.1" id="toc-step-6.1" class="nav-link" data-scroll-target="#step-6.1">Step 6.1</a></li>
+  <li><a href="#step-6.2" id="toc-step-6.2" class="nav-link" data-scroll-target="#step-6.2">Step 6.2</a></li>
+  <li><a href="#step-6.3" id="toc-step-6.3" class="nav-link" data-scroll-target="#step-6.3">Step 6.3</a></li>
+  <li><a href="#step-6.4" id="toc-step-6.4" class="nav-link" data-scroll-target="#step-6.4">Step 6.4</a></li>
+  <li><a href="#step-6.5" id="toc-step-6.5" class="nav-link" data-scroll-target="#step-6.5">Step 6.5</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 3: MAUP in Practice — Tessellations and Point-in-Polygon</h1>
+<p class="subtitle lead">National Dam Inventory (NID): From Counts to Local Clustering</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/04-dams.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="background" class="level1">
+<h1>Background</h1>
+<p>In this lab we will explore the impacts of tessellated surfaces and the modifiable areal unit problem (MAUP) using the National Dam Inventory maintained by the United States Army Corps of Engineers. The work requires writing reusable functions and careful consideration of feature aggregation/simplification, spatial joins, and data visualization. The end goal is to visualize the distribution of dams and their purposes across the country.</p>
+<p><strong>DISCLAIMER</strong>: This lab can be computationally intensive. For some steps you may be processing hundreds of millions of relations; run code chunk-by-chunk during development rather than knitting the whole document repeatedly. Your final knit may take a few minutes. Be proud — the report will summarize analyses over very large geometric relations.</p>
+<hr>
+<p>This lab covers 4 main skills:</p>
+<ol type="1">
+<li><strong>Tessellating surfaces</strong> to discretize space</li>
+<li><strong>Geometry simplification</strong> to expedite expensive intersections</li>
+<li><strong>Writing functions</strong> to automate repetitive reporting and mapping tasks</li>
+<li><strong>Point-in-polygon counts</strong> to aggregate point data</li>
+</ol>
+<section id="graduate-level-expectations" class="level2">
+<h2 class="anchored" data-anchor-id="graduate-level-expectations">Graduate-Level Expectations</h2>
+<p>In addition to producing correct code and outputs, your submission should:</p>
+<ul>
+<li><strong>Justify methodological choices</strong>: Why did you choose a particular tessellation <code>keep</code> percentage for simplification? How did you balance computational efficiency with map detail?</li>
+<li><strong>Document performance impacts</strong>: Measure and report computation time and geometric accuracy changes resulting from simplification. How do results differ?</li>
+<li><strong>Apply spatial reasoning</strong>: Use spatial predicates (e.g., <code>st_touches</code>, <code>st_contains</code>) to identify and describe geometric relationships in the dam dataset that raw counts cannot reveal.</li>
+<li><strong>Compare across methods</strong>: When multiple tessellation approaches yield different clustering patterns, explain which pattern better supports real-world dam management decisions and why.</li>
+<li><strong>Connect to lecture</strong>: Explicitly cite the MAUP problem, simplification algorithms (Douglas-Peucker vs.&nbsp;Visvalingam), and spatial predicate definitions from week 3 lectures in your analysis.</li>
+</ul>
+<section id="libraries" class="level3">
+<h3 class="anchored" data-anchor-id="libraries">Libraries</h3>
+<hr>
+</section>
+</section>
+</section>
+<section id="question-1" class="level1">
+<h1>Question 1:</h1>
+<p>Here we will prepare five tessellated surfaces from CONUS and write a function to plot them in a descriptive way.</p>
+<section id="step-1.1" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.1">Step 1.1</h3>
+<p>First, we need a spatial file of CONUS counties. For future area calculations we want these in an equal area projection (<code>EPSG:5070</code>).</p>
+<p>To achieve this:</p>
+<ul>
+<li><p>get an <code>sf</code> object of US counties (<code>AOI::aoi_get(state = "conus", county = "all")</code>)</p></li>
+<li><p>transform the data to <code>EPSG:5070</code></p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>CONUS_counties <span class="ot">&lt;-</span> <span class="fu">aoi_get</span>(<span class="at">state =</span> <span class="st">"conus"</span>, <span class="at">county =</span> <span class="st">"all"</span>) <span class="co">#load in data</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>CONUS_counties <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(CONUS_counties, <span class="dv">5070</span>) <span class="co">#transform CRS</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(CONUS_counties) <span class="co">#verify new CRS, EPSG:5070</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:5070 
+  wkt:
+PROJCRS["NAD83 / Conus Albers",
+    BASEGEOGCRS["NAD83",
+        DATUM["North American Datum 1983",
+            ELLIPSOID["GRS 1980",6378137,298.257222101,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4269]],
+    CONVERSION["Conus Albers",
+        METHOD["Albers Equal Area",
+            ID["EPSG",9822]],
+        PARAMETER["Latitude of false origin",23,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8821]],
+        PARAMETER["Longitude of false origin",-96,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8822]],
+        PARAMETER["Latitude of 1st standard parallel",29.5,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8823]],
+        PARAMETER["Latitude of 2nd standard parallel",45.5,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8824]],
+        PARAMETER["Easting at false origin",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8826]],
+        PARAMETER["Northing at false origin",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8827]]],
+    CS[Cartesian,2],
+        AXIS["easting (X)",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["northing (Y)",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Data analysis and small scale data presentation for contiguous lower 48 states."],
+        AREA["United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming."],
+        BBOX[24.41,-124.79,49.38,-66.91]],
+    ID["EPSG",5070]]</code></pre>
+</div>
+</div>
+</section>
+<section id="step-1.2" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.2">Step 1.2</h3>
+<p>For triangle based tessellations we need point locations to serve as our “anchors”.</p>
+<p>To achieve this:</p>
+<ul>
+<li><p>generate county centroids using <code>st_centroid</code></p></li>
+<li><p>Since, we can only tessellate over a feature we need to <em>combine</em> or <em>union</em> the resulting 3,108 <code>POINT</code> features into a single <code>MULTIPOINT</code> feature</p></li>
+<li><p>Since these are point objects, the difference between union/combine is mute</p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>county_centroid <span class="ot">&lt;-</span> <span class="fu">st_centroid</span>(CONUS_counties) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-1.3" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.3">Step 1.3</h3>
+<p>Tessellations/Coverage’s describe the <strong>extent</strong> of a region with geometric shapes, called <strong>tiles</strong>, with <em>no</em> overlaps or gaps.</p>
+<p><strong>Tiles</strong> can range in <em>size</em>, <em>shape</em>, <em>area</em> and have different methods for being created.</p>
+<p>Some methods generate triangular tiles across a set of defined points (e.g.&nbsp;<code>Voronoi</code> and Delaunay triangulation)</p>
+<p>Others generate equal area tiles over a known extent (<code>st_make_grid</code>)</p>
+<p>For this lab, we will create surfaces of CONUS using using 4 methods, 2 based on an extent and 2 based on point anchors:</p>
+<p><strong>Tessellations</strong> :</p>
+<ul>
+<li><p><code>st_voronoi</code>: creates a Voronoi tessellation</p></li>
+<li><p><code>st_triangulate</code>: triangulates a set of points (not constrained)</p></li>
+</ul>
+<p><strong>Coverages</strong>:</p>
+<ul>
+<li><p><code>st_make_grid</code>: creates a square grid covering the geometry of an sf or sfc object</p></li>
+<li><p><code>st_make_grid(square = FALSE)</code>: creates a hexagonal grid covering the geometry of an sf or sfc object</p></li>
+<li><p>The side of coverage tiles can be defined by a cell resolution or a specified number of cell in the X and Y direction</p></li>
+</ul>
+<hr>
+<p>For this step:</p>
+<ul>
+<li>Make a voroni tessellation over your county centroids (<code>MULTIPOINT</code>)</li>
+<li>Make a triangulated tessellation over your county centroids (<code>MULTIPOINT</code>)</li>
+<li>Make a gridded coverage with n = 70, over your counties object</li>
+<li>Make a hexagonal coverage with n = 70, over your counties object</li>
+</ul>
+<p>In addition to creating these 4 coverage’s we need to add an ID to each <em>tile</em>.</p>
+<p>To do this:</p>
+<ul>
+<li><p>add a new column to each tessellation that spans from <code>1:n()</code>.</p></li>
+<li><p>Remember that <strong>ALL</strong> tessellation methods return an <code>sfc</code> <code>GEOMETRYCOLLECTION</code>, and to add attribute information - like our ID - you will have to coerce the <code>sfc</code> list into an <code>sf</code> object (<code>st_sf</code> or <code>st_as_sf</code>)</p></li>
+</ul>
+<p>Last, we want to ensure that our surfaces are topologically valid/simple.</p>
+<ul>
+<li><p>To ensure this, we can pass our surfaces through <code>st_cast</code>.</p></li>
+<li><p>Remember that casting an object explicitly (e.g. <code>st_cast(x, "POINT")</code>) changes a geometry</p></li>
+<li><p>If no output type is specified (e.g.&nbsp;<code>st_cast(x)</code>) then the cast attempts to simplify the geometry.</p></li>
+<li><p>If you don’t do this you might get unexpected “TopologyException” errors.</p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#voronoi tessellation</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>voronoi_counties <span class="ot">&lt;-</span>  <span class="fu">st_cast</span>(<span class="fu">st_voronoi</span>(county_centroid)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_sf</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">voronoi =</span> geometry)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#triangulated tessellation </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>triangulated_counties <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(<span class="fu">st_triangulate</span>(county_centroid)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_sf</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">triangulated =</span> geometry)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#gridded coverage </span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>grid_counties <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(<span class="fu">st_make_grid</span>(county_centroid, <span class="at">n =</span> <span class="dv">70</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_sf</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">grid =</span> geometry)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#hexagonal coverage</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>hex_counties <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(<span class="fu">st_make_grid</span>(county_centroid, <span class="at">n =</span> <span class="dv">70</span>, <span class="at">square =</span> F)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_sf</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">hex =</span> geometry)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-1.4" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.4">Step 1.4</h3>
+<p>If you plot the above tessellations you’ll see that the <strong>Voronoi</strong>, <strong>Delaunay triangulation</strong>, <strong>hexagon</strong>, and <strong>square grids</strong> all produce regions far beyond the boundaries of CONUS.</p>
+<p>We need to cut these boundaries to CONUS borders.</p>
+<p>To do this, we need two different approaches: - <strong><code>st_intersection()</code></strong> for Voronoi and Delaunay (these tessellations create geometries that extend infinitely/far beyond the study area; intersection clips them at the exact boundary) - <strong><code>st_filter()</code></strong> for hexagon and square grids (these regular grids are already designed to fit; filtering keeps only the tiles that intersect CONUS)</p>
+<p>Either way, we’ll need a geometry of CONUS to serve as our clipping feature. We can get this by unioning our existing county boundaries.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#make geom of CONUS to serve as clipping feature </span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>CONUS_border <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(<span class="fu">st_union</span>(CONUS_counties))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-1.5" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.5">Step 1.5</h3>
+<p>With a single feature boundary, we must carefully consider the complexity of the geometry. Remember, the more points our geometry contains, the more computations needed for spatial predicates our differencing. For a task like ours, we do not need a finely resolved coastal boarder.</p>
+<p>To achieve this:</p>
+<ul>
+<li><p>Simplify your unioned border using the Visvalingam algorithm provided by <code>rmapshaper::ms_simplify</code>.</p></li>
+<li><p>Choose what percentage of vertices to retain using the <code>keep</code> argument and work to find the highest number that provides a shape <em>you</em> are comfortable with for the analysis:</p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>CONUS_border<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">ms_simplify</span>(CONUS_border, <span class="at">keep =</span> <span class="fl">0.1</span>) <span class="co">#blue #great</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>CONUS_border<span class="fl">.05</span> <span class="ot">&lt;-</span> <span class="fu">ms_simplify</span>(CONUS_border, <span class="at">keep =</span> <span class="fl">0.05</span>) <span class="co">#green #great</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>CONUS_border<span class="fl">.025</span> <span class="ot">&lt;-</span> <span class="fu">ms_simplify</span>(CONUS_border, <span class="at">keep =</span> <span class="fl">0.025</span>) <span class="co">#orange #perfect</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>CONUS_border<span class="fl">.01</span> <span class="ot">&lt;-</span> <span class="fu">ms_simplify</span>(CONUS_border, <span class="at">keep =</span> <span class="fl">0.01</span>) <span class="co">#red #almost good</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>CONUS_border<span class="fl">.001</span> <span class="ot">&lt;-</span> <span class="fu">ms_simplify</span>(CONUS_border, <span class="at">keep =</span> <span class="fl">0.001</span>)<span class="co">#yellow #too simple</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(CONUS_border) <span class="sc">+</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> CONUS_border<span class="fl">.1</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> CONUS_border<span class="fl">.05</span>, <span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">fill =</span> <span class="cn">NA</span>,  <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> CONUS_border<span class="fl">.025</span>, <span class="at">color =</span> <span class="st">"darkorange"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> CONUS_border<span class="fl">.01</span>, <span class="at">color =</span> <span class="st">"darkred"</span>,<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> CONUS_border<span class="fl">.001</span>, <span class="at">col =</span> <span class="st">"goldenrod"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"CONUS Border Simplification Comparison"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"blue = 10% vertices, green = 5%, orange = 2.5%, red = 1%, yellow = 0.1%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-03_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#keep 2.5% of points </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>boundary_simplified <span class="ot">&lt;-</span> <span class="fu">ms_simplify</span>(CONUS_border, <span class="at">keep =</span> <span class="fl">0.025</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Validation Checkpoint (Optional)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After simplification, verify the boundary is still valid and covers all dams:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: Is the simplified boundary valid?</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_is_valid</span>(boundary_simplified)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: Does it still contain all of CONUS?</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">st_bbox</span>(boundary_simplified)  <span class="co"># Should cover roughly [-125, 24] to [-66, 49]</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">st_bbox</span>(CONUS_border) <span class="co">#doesn't cover listed points, but has similar bounding box to original boundary </span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: Visual comparison</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(CONUS_border, <span class="at">main =</span> <span class="st">"Original"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(boundary_simplified, <span class="at">main =</span> <span class="st">"Simplified"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Simplification: Boundary Only, Not Tessellation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Important distinction</strong>: This step simplifies the <strong>CONUS boundary container</strong> we use for clipping the tessellated surfaces. Simplification affects <em>only</em> the geometry of the clipping operation — it speeds up the intersection computation by reducing boundary vertices. Your tessellation tiles themselves remain <strong>high-resolution</strong> and unchanged. You are not simplifying the tessellation itself, only the container we clip with.</p>
+</div>
+</div>
+<ul>
+<li><p>Once you are happy with your simplification, use the <code>mapview::npts</code> function to report the number of points in your original object, and the number of points in your simplified object.</p></li>
+<li><p>How many points were you able to remove? What are the consequences of doing this computationally?</p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mapview<span class="sc">::</span><span class="fu">npts</span>(boundary_simplified) <span class="co">#287 points</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 287</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mapview<span class="sc">::</span><span class="fu">npts</span>(CONUS_border) <span class="co">#11292 points </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 11292</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>I was able to remove a little over 11,000 points from the boundary through simplification. This means there will be fewer computaions, which will make any calculations run faster. However, this may not capture fine details along the coastline, so it’s important to simplify based on the computational objective.</p>
+</blockquote>
+<ul>
+<li>Finally, crop <strong>all four grids</strong> to the CONUS boundary—but using different methods:
+<ul>
+<li><strong>Voronoi &amp; Delaunay</strong> (geometry-based tessellations): Use <code>st_intersection()</code> to <em>cut</em> these geometries at the CONUS boundary. These tessellations create boundaries that extend well beyond CONUS; intersection actually trims them.</li>
+<li><strong>Hexagon &amp; Square grids</strong> (regular grids): Use <code>st_filter()</code> to keep only tiles that touch CONUS. These grids are already regularly aligned; filtering just discards edge tiles without modifying them.</li>
+</ul></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#st_intersect for voronoi and delaunay triangulated </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>voronoi_counties <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(voronoi_counties, boundary_simplified)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>triangulated_counties <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(triangulated_counties, boundary_simplified)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#st_filter for haxagon and square grids </span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>grid_counties <span class="ot">&lt;-</span> <span class="fu">st_filter</span>(grid_counties, boundary_simplified)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>hex_counties <span class="ot">&lt;-</span> <span class="fu">st_filter</span>(hex_counties, boundary_simplified)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Why Different Cropping Methods?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>The distinction matters for your spatial analysis:</strong></p>
+<ul>
+<li><p><strong><code>st_intersection()</code> on Voronoi/Delaunay</strong>: Produces edges/boundaries that align precisely with the CONUS border. Tiles at the edge are cut, not discarded. This is geometrically accurate but creates irregular edge shapes.</p></li>
+<li><p><strong><code>st_filter()</code> on hexagon/square grids</strong>: Keeps only complete regular tiles that touch CONUS, discarding edge tiles. The boundary is a stair-step pattern following the regular grid.</p></li>
+</ul>
+<p><strong>In Q3</strong>, when you compare these tessellations, you’ll notice that Voronoi and Delaunay have denser tile coverage (e.g., ~2800–6200 tiles) because they extend to the exact boundary. Hexagons and squares have fewer tiles (e.g., ~1900–2000) because they’re bound to a regular grid. <strong>This difference affects spatial statistics</strong>: denser tessellations reveal finer-grained patterns; coarser tessellations show broader regional structure. This is part of the Modifiable Areal Unit Problem (MAUP).</p>
+</div>
+</div>
+</section>
+<section id="step-1.6" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.6">Step 1.6</h3>
+<p>The last step is to plot your tessellations. We don’t want to write out 5 ggplots (or mindlessly copy and paste)</p>
+<p>Instead, lets make a function that takes an <code>sf</code> object as <em>arg1</em> and a character string as <em>arg2</em> and returns a ggplot object showing <em>arg1</em> titled with <em>arg2</em>.</p>
+<hr>
+<p>The form of a function is:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>name <span class="ot">=</span> <span class="cf">function</span>(arg1, arg2) {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  ... code goes here ...</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<hr>
+<p>For this function:</p>
+<ul>
+<li><p>The name can be anything you chose, <em>arg1</em> should take an <code>sf</code> object, and <em>arg2</em> should take a character string that will title the plot</p></li>
+<li><p>In your function, the code should follow our standard <code>ggplot</code> practice where your data is <em>arg1</em>, and your title is <em>arg2</em></p></li>
+<li><p>The function should also enforce the following:</p>
+<ul>
+<li><p>a <code>white</code> fill</p></li>
+<li><p>a <code>navy</code> border</p></li>
+<li><p>a <code>size</code> of 0.2</p></li>
+<li><p>`theme_void``</p></li>
+<li><p>a caption that reports the number of features in <em>arg1</em></p>
+<ul>
+<li>You will need to paste character stings and variables together.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_counties <span class="ot">&lt;-</span> <span class="cf">function</span>(arg1, arg2) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">data =</span> arg1) <span class="sc">+</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="at">fill =</span> <span class="st">"white"</span>, <span class="at">color =</span> <span class="st">"navy"</span>, <span class="at">size =</span> <span class="fl">0.2</span>) <span class="sc">+</span> </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste</span>(arg2, <span class="st">"of Continental U.S. Counties"</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="fu">paste</span>(<span class="st">"This tessalation of CONUS counties has"</span>, <span class="fu">nrow</span>(arg1), <span class="st">"tiles"</span>)) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>()</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#arg 1 = data </span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#arg 2 = tessellation type </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-1.7" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.7">Step 1.7</h3>
+<p>Use your new function to plot each of your tessellated surfaces and the original county data (5 plots in total):</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#original </span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_counties</span>(CONUS_counties, <span class="st">"Map"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-03_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#voronoi</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_counties</span>(voronoi_counties, <span class="st">"Voronoi Tessellation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-03_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#triangulated </span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_counties</span>(triangulated_counties, <span class="st">"Triangulated Tessellation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-03_files/figure-html/unnamed-chunk-14-3.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#grid </span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_counties</span>(grid_counties, <span class="st">"Square Grid Tessellation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-03_files/figure-html/unnamed-chunk-14-4.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#hex</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_counties</span>(hex_counties, <span class="st">"Hexagon Grid Tessellation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-03_files/figure-html/unnamed-chunk-14-5.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="question-2" class="level1">
+<h1>Question 2:</h1>
+<p>In this question, we will write out a function to summarize our tessellated surfaces.</p>
+<section id="step-2.1" class="level3">
+<h3 class="anchored" data-anchor-id="step-2.1">Step 2.1</h3>
+<p>First, we need a function that takes a <code>sf</code> object and a <code>character</code> string and returns a <code>data.frame</code>.</p>
+<p>For this function:</p>
+<ul>
+<li><p>The function name can be anything you chose, <em>arg1</em> should take an <code>sf</code> object, and <em>arg2</em> should take a character string describing the object</p></li>
+<li><p>In your function, calculate the area of <code>arg1</code>; convert the units to km<sup>2</sup>; and then drop the units</p></li>
+<li><p>Next, create a <code>data.frame</code> containing the following:</p>
+<ol type="1">
+<li><p>text from <em>arg2</em></p></li>
+<li><p>the number of features in <em>arg1</em></p></li>
+<li><p>the mean area of the features in <em>arg1</em> (km<sup>2</sup>)</p></li>
+<li><p>the standard deviation of the features in <em>arg1</em></p></li>
+<li><p>the total area (km<sup>2</sup>) of <em>arg1</em></p></li>
+</ol></li>
+<li><p>Return this <code>data.frame</code></p></li>
+</ul>
+</section>
+<section id="step-2.2" class="level3">
+<h3 class="anchored" data-anchor-id="step-2.2">Step 2.2</h3>
+<p>Use your new function to summarize each of your tessellations and the original counties.</p>
+</section>
+<section id="step-2.3" class="level3">
+<h3 class="anchored" data-anchor-id="step-2.3">Step 2.3</h3>
+<p>Multiple <code>data.frame</code> objects can bound row-wise with <code>bind_rows</code> into a single <code>data.frame</code></p>
+<p>For example, if your function is called <code>sum_tess</code>, the following would bind your summaries of the triangulation and voroni object.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum_tess</span>(triangulate_grid, <span class="st">"triangulation"</span>),</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum_tess</span>(voronoi_grid, <span class="st">"voronoi"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-2.4" class="level3">
+<h3 class="anchored" data-anchor-id="step-2.4">Step 2.4</h3>
+<p>Once your 5 summaries are bound (2 tessellations, 2 coverage’s, and the raw counties) print the <code>data.frame</code> as a nice table using <code>knitr</code>/<code>kableExtra</code>/<code>flextable</code> or your preferred table formatting package.</p>
+</section>
+<section id="step-2.5" class="level3">
+<h3 class="anchored" data-anchor-id="step-2.5">Step 2.5</h3>
+<p>Comment on the traits of each tessellation. Be specific about how these traits might impact the results of a point-in-polygon analysis in the contexts of the modifiable areal unit problem and with respect computational requirements.</p>
+<hr>
+</section>
+</section>
+<section id="question-3-dam-distribution-analysis-tessellation-selection" class="level1">
+<h1>Question 3: Dam Distribution Analysis &amp; Tessellation Selection</h1>
+<p>The data we will analyze in this lab are from the U.S. Army Corps of Engineers National Dam Inventory (NID). This dataset documents ~91,000 dams in the United States and includes attributes such as design specifications, risk level, age, and purpose.</p>
+<p>Dam management agencies face a critical question: <strong>Where are dams actually clustered, and how do I visualize that clustering in a way that supports infrastructure planning decisions?</strong> The answer depends on your choice of geographic boundaries—that is, your tessellation. Different tessellations will reveal different patterns of dam concentration. Your job in this question is to:</p>
+<ol type="1">
+<li>Quantify dam distributions across multiple tessellation methods</li>
+<li>Understand how the <strong>modifiable areal unit problem (MAUP)</strong> creates different narratives from the same underlying data</li>
+<li><strong>Select and justify the tessellation that best supports management decisions</strong> about dam clustering</li>
+</ol>
+<p>For the remainder of this lab we will analyze the distributions of these dams using point-in-polygon analysis.</p>
+<section id="step-3.1" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.1">Step 3.1</h3>
+<p>In the tradition of this class - and true to data science/GIS work - you need to find, download, and manage raw data. THe NID dataset is available as a CSV download from the USACE website <a href="https://nid.sec.usace.army.mil/nid/#/downloads">here</a>. Grab the CSV.</p>
+<ul>
+<li>Return to your RStudio Project and read the data in using the <code>readr::read_csv</code>
+<ul>
+<li>Use <code>janitor::clean_names()</code> to standardize column names to snake_case (tidy data convention)</li>
+<li>After reading the data in, be sure to remove rows that don’t have location values (<code>!is.na()</code>)</li>
+<li>Convert the <code>data.frame</code> to a <code>sf</code> object by defining the coordinates and CRS</li>
+<li>Transform the data to a CONUS AEA (EPSG:5070) projection - matching your tessellation</li>
+<li>Filter to include only those within your CONUS boundary</li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Data Cleaning with janitor
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The NID CSV has messy column names (all caps with spaces). The <code>janitor::clean_names()</code> function converts them to clean snake_case (<code>LONGITUDE</code> → <code>longitude</code>, <code>DAM NAME</code> → <code>dam_name</code>). This is a lightweight utility that saves time and prevents typos in downstream code. It’s part of data wrangling best practice.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefer a local NID CSV named `nation.csv`; otherwise download to that filename</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>nid_url <span class="ot">&lt;-</span> <span class="st">"https://nid.sec.usace.army.mil/api/nation/csv"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">"data"</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>nid_dest <span class="ot">&lt;-</span> <span class="st">"data/nation.csv"</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(nid_dest)) {</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Using local NID file: "</span>, nid_dest)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tryCatch</span>({</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">"Downloading NID CSV to: "</span>, nid_dest)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(nid_url, nid_dest, <span class="at">quiet =</span> <span class="cn">FALSE</span>, <span class="at">mode =</span> <span class="st">"wb"</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">"NID download failed: "</span>, e<span class="sc">$</span>message)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co"># read the CSV (will error if download failed and file missing)</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(nid_dest)) <span class="fu">stop</span>(<span class="st">"NID CSV not found at "</span>, nid_dest)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>dams <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(nid_dest, <span class="at">skip =</span><span class="dv">1</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>()</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>usa <span class="ot">&lt;-</span> AOI<span class="sc">::</span><span class="fu">aoi_get</span>(<span class="at">state =</span> <span class="st">"conus"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">5070</span>)</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>dams2 <span class="ot">&lt;-</span> dams <span class="sc">%&gt;%</span> </span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(latitude)) <span class="sc">%&gt;%</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">5070</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_filter</span>(usa)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-3.2" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.2">Step 3.2</h3>
+<p>Following the in-class examples develop an efficient point-in-polygon function that takes:</p>
+<ul>
+<li>points as <code>arg1</code>,</li>
+<li>polygons as <code>arg2</code>,</li>
+<li>The name of the id column as <code>arg3</code></li>
+</ul>
+<p>The function should make use of spatial and non-spatial joins, sf coercion and <code>dplyr::count</code>. The returned object should be input <code>sf</code> object with a column - <code>n</code> - counting the number of points in each tile.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Point-in-Polygon Function Design Notes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>CRS Matching</strong>: Ensure <code>points</code> and <code>polygons</code> are in the same CRS before calling <code>st_join()</code>. If they differ, use <code>st_transform()</code> to align them first.</p></li>
+<li><p><strong>Empty Polygons</strong>: <code>st_join(...) %&gt;% count(id)</code> creates one row per intersection found. Polygons with <em>zero</em> intersections will appear in the result with <code>n = 0</code> <strong>only if</strong> you use a <em>left join</em> (default for <code>st_join()</code>). If a polygon has no points, make sure your result still includes it; if not, use <code>st_join(...) %&gt;% right_join(...)</code> or initialize counts explicitly.</p></li>
+<li><p><strong>Sparse vs.&nbsp;Dense Matrices</strong>: In this step you’re not creating matrices. However, in Q6.1 you’ll use <code>st_touches(..., sparse = FALSE)</code> to build neighbor matrices explicitly. Here in Q3, <code>st_join()</code> handles the spatial predicate internally (<code>st_intersects</code> by default), so you won’t set sparsity—just know that <code>st_join()</code> scales well to large datasets. For troubleshooting performance: if your function runs slowly with 91,000 dams, check whether your tessellation polygons are topologically simple (use <code>st_is_valid()</code>).</p></li>
+</ol>
+</div>
+</div>
+</section>
+<section id="step-3.3" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.3">Step 3.3</h3>
+<p>Apply your point-in-polygon function to each of your five tessellated surfaces where:</p>
+<ul>
+<li>Your points are the dams</li>
+<li>Your polygons are the respective tessellation</li>
+<li>The id column is the name of the id columns you defined.</li>
+</ul>
+</section>
+<section id="step-3.4" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.4">Step 3.4</h3>
+<p>Lets continue the trend of automating our repetitive tasks through function creation. This time make a new function that extends your previous plotting function.</p>
+<p>For this function:</p>
+<ul>
+<li><p>The name can be anything you chose, <em>arg1</em> should take an <code>sf</code> object, and <em>arg2</em> should take a character string that will title the plot</p></li>
+<li><p>The function should also enforce the following:</p>
+<ul>
+<li><p>the fill aesthetic is driven by the count column <code>n</code></p></li>
+<li><p>the col is <code>NA</code></p></li>
+<li><p>the fill is scaled to a continuous <code>viridis</code> color ramp</p></li>
+<li><p><code>theme_void</code></p></li>
+<li><p>a caption that reports the number of dams in <em>arg1</em> (e.g. <code>sum(n)</code>)</p>
+<ul>
+<li>You will need to paste character stings and variables together.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="step-3.5" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.5">Step 3.5</h3>
+<p>Apply your plotting function to each of the 5 tessellated surfaces with Point-in-Polygon counts:</p>
+</section>
+<section id="step-3.6" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.6">Step 3.6</h3>
+<p><strong>Policy Analysis: Tessellation and Decision-Making</strong></p>
+<p>Now that you have dam counts across all five tessellation methods, compare the results. Specifically:</p>
+<p><strong>a.</strong> Create a side-by-side visualization (faceted or small multiples) showing dam clustering under each of the five tessellations. Use <code>patchwork</code> or <code>cowplot</code> to arrange the 5 plots you created in Step 3.5 for direct visual comparison.</p>
+<p><strong>b.</strong> Identify <strong>2–3 geographic regions</strong> where tessellation choice produces substantially <em>different</em> patterns (e.g., one method shows a clear hotspot while another shows diffuse distribution). For each region, describe the pattern difference and explain <em>why</em> the tessellation geometry creates divergent results. Reference the characteristics from your Q2 summary (number of tiles, mean area, standard deviation).</p>
+<p><strong>c.</strong> <strong>Which single tessellation would you recommend to a dam operations manager seeking to understand geographic clustering?</strong> Justify your choice by addressing: - Does the tessellation align with natural or management decision-making units (e.g., river basins, states, hydrologic regions)? - Does it reveal meaningful patterns without over-fragmenting the landscape or creating artificial boundaries? - How does MAUP influence your recommendation—are other tessellations equally valid, just for different questions? - How did simplification affect your choice? Would a coarser or finer simplification (different <code>keep</code> percentage) change your recommendation? - What does “best supports management decisions” mean concretely in your context—does it matter more that hot spots are obvious, or that boundaries align with jurisdictions?</p>
+<p>Your answer should be <strong>3–4 paragraphs</strong> and grounded in the actual visualizations and patterns you observe from your tessellation comparisons.</p>
+<hr>
+</section>
+</section>
+<section id="question-4" class="level1">
+<h1>Question 4</h1>
+<p>The NID provides a comprehensive data dictionary <a href="https://files.hawaii.gov/dbedt/op/gis/data/nid_dams_data_dictionary.htm#Purposes">here</a>. In it we find that dam purposes are designated by a character <a href="https://files.hawaii.gov/dbedt/op/gis/data/nid_dams_data_dictionary.htm#Purposes">code</a>.</p>
+<p>These are shown below for convenience (built using knitr on a data.frame called <code>nid_classifier</code>):</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped caption-top table-sm small">
+<caption>NID 2019: Dam Purposes</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">abbr</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">I</td>
+<td style="text-align: left;">Irrigation</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: left;">Hydroelectric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: left;">Flood Control</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">N</td>
+<td style="text-align: left;">Navigation</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S</td>
+<td style="text-align: left;">Water Supply</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">R</td>
+<td style="text-align: left;">Recreation</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">P</td>
+<td style="text-align: left;">Fire Protection</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: left;">Fish and Wildlife</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">D</td>
+<td style="text-align: left;">Debris Control</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">T</td>
+<td style="text-align: left;">Tailings</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: left;">Grade Stabilization</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">O</td>
+<td style="text-align: left;">Other</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li><p>In the data dictionary, we see a dam can have <em>multiple</em> purposes.</p></li>
+<li><p>In these cases, the purpose codes are concatenated in order of decreasing importance. For example, <code>SCR</code> would indicate the primary purposes are <em>Water Supply</em>, then <em>Flood Control</em>, then <em>Recreation.</em></p></li>
+<li><p>A standard summary indicates there are over 400 unique combinations of dam purposes:</p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(dams2<span class="sc">$</span>PURPOSES) <span class="sc">%&gt;%</span> <span class="fu">length</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<ul>
+<li>By storing dam codes as a concatenated string, there is no easy way to identify how many dams serve any one purpose… for example where are the hydro electric dams?</li>
+</ul>
+<hr>
+<p>To overcome this data structure limitation, we can identify how many dams serve each purpose by splitting the PURPOSES values (<code>strsplit</code>) and tabulating the unlisted results as a data.frame. Effectively this is double/triple/quadruple counting dams bases on how many purposes they serve:</p>
+<p>The result of this would indicate:</p>
+<section id="step-4.1" class="level3">
+<h3 class="anchored" data-anchor-id="step-4.1">Step 4.1</h3>
+<ul>
+<li><p>Your task is to create point-in-polygon counts for at <em>least</em> 4 of the above dam purposes:</p></li>
+<li><p>You will use <code>grepl</code> to filter the complete dataset to those with your chosen purpose</p></li>
+<li><p>Remember that <code>grepl</code> returns a boolean if a given pattern is matched in a string</p></li>
+<li><p><code>grepl</code> is vectorized so can be used in <code>dplyr::filter</code></p></li>
+</ul>
+<hr>
+<p>For example:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Find flood control dams in the first 5 records:</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>dams2<span class="sc">$</span>PURPOSES[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>NULL</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grepl</span>(<span class="st">"F"</span>, dams2<span class="sc">$</span>PURPOSES[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>logical(0)</code></pre>
+</div>
+</div>
+<hr>
+<p>For your analysis, choose <em>at least</em> four of the above codes, and describe why you chose them. Then for each of them, create a subset of dams that serve that purpose using <code>dplyr::filter</code> and <code>grepl</code></p>
+<p>Finally, use your <code>point-in-polygon</code> function to count each subset across your <strong>cropped tessellation from Q1.4</strong> (e.g., <code>hexagon_clipped</code> or <code>square_clipped</code>).</p>
+</section>
+<section id="step-4.2" class="level3">
+<h3 class="anchored" data-anchor-id="step-4.2">Step 4.2</h3>
+<ul>
+<li><p>Now use your plotting function from Q3 to map these counts on the <strong>cropped tessellation</strong>.</p></li>
+<li><p><em>But!</em> you will use <code>gghighlight</code> to <strong>only</strong> color those tiles where the count (<em>n</em>) is greater then the (<code>mean + 1 standard deviation</code>) of the set</p></li>
+<li><p>Since your plotting function returns a <code>ggplot</code> object already, the <code>gghighlight</code> call can be added “<code>+</code>” directly to the function.</p></li>
+<li><p>The result of this exploration is to highlight the areas of the country with the most</p></li>
+</ul>
+</section>
+<section id="step-4.3" class="level3">
+<h3 class="anchored" data-anchor-id="step-4.3">Step 4.3</h3>
+<p>Comment on the geographic distribution of dams you found. Does it make sense? How might the tessellation you chose impact your findings? How does the distribution of dams coincide with other geographic factors such as river systems, climate, ect?</p>
+<p><strong>Optional: Connect to Q6</strong> — For purposes you chose in Q4, hypothesize in 1–2 sentences: <em>“Will [irrigation/hydroelectric] dams show the same LISA hotspots as all dams in Q6, or different patterns? Why?”</em> After completing Q6, revisit this hypothesis.</p>
+</section>
+</section>
+<section id="question-5-spatial-correlation-of-dam-attributes-introduction-to-spatial-regression" class="level1">
+<h1>Question 5: Spatial Correlation of Dam Attributes — Introduction to Spatial Regression</h1>
+<p>Dam characteristics—such as <strong>age, surface area, storage capacity, and purpose</strong>—vary geographically. Understanding the spatial structure of these relationships is foundational to spatial regression modeling (upcoming topics). In this question, you’ll examine whether dam attributes exhibit <strong>spatial dependence</strong> and assess whether neighboring tiles have correlated characteristics.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Spatial Regression Motivation (Week 3-1 Foundation)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Standard regression assumes observations are <strong>independent</strong>. But spatial data often violates this: dams in the Pacific Northwest likely share design and management practices, leading to <strong>spatially correlated residuals</strong>. This spatial dependence can bias confidence intervals and inflate significance tests in standard OLS regression.</p>
+<p>The solution involves <strong>spatial lag models</strong> (Spatial Autoregressive, SAR) or <strong>spatial error models</strong> (SEM) that explicitly model dependence via neighbor relationships. This lab asks: <em>Do your tessellation neighborhoods reveal spatial structure in dam attributes?</em></p>
+<p><strong>For this question, use your cropped tessellation from Q1.4</strong> (your recommended tessellation from Q3, clipped to the CONUS boundary). You’ll examine whether dam attributes (age, size, count) are spatially autocorrelated—evidence that neighboring tiles have similar values, violating independence assumptions.</p>
+</div>
+</div>
+<section id="step-5.1" class="level3">
+<h3 class="anchored" data-anchor-id="step-5.1">Step 5.1</h3>
+<p><strong>Aggregate Dam Attributes by Tile</strong></p>
+<p>Using your <strong>cropped tessellation from Q1.4</strong> (your recommended grid from Q3, clipped to CONUS boundary), compute <strong>mean and variance</strong> of key dam attributes within each tile. The NID dataset typically includes:</p>
+<ul>
+<li><strong>Age</strong>: <code>year_completed</code> or similar (compute mean age per tile)</li>
+<li><strong>Size</strong>: <code>surface_area_acres</code> or <code>normal_pool_elevation</code> (compute mean per tile)</li>
+<li><strong>Purpose codes</strong>: <code>purposes</code> field (compute dominant purpose per tile; count of dams by purpose)</li>
+</ul>
+<p>Aggregate as follows:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Suggested workflow (write your own implementation):</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) spatial join dams to your cropped tessellation</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) group by tile id and summarize n_dams, mean_year_completed, mean_surface_area</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) join summaries back to geometry and preserve zero-dam tiles</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) inspect distributions before mapping</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Produce visualizations</strong> showing spatial patterns:</p>
+<ul>
+<li>Map 1: Mean dam age by tile (use viridis scale)</li>
+<li>Map 2: Mean surface area by tile</li>
+<li>Map 3: Dam count by tile (you already have this from Q3)</li>
+</ul>
+<p>Do you see geographic clustering of old vs.&nbsp;new dams? Large vs.&nbsp;small dams?</p>
+</section>
+<section id="step-5.2" class="level3">
+<h3 class="anchored" data-anchor-id="step-5.2">Step 5.2</h3>
+<p><strong>Neighbor Correlation: Local Spatial Variation</strong></p>
+<p>For your tessellation’s neighbor matrix (from Q6), compute the <strong>spatial lag</strong> of dam attributes: the average value of an attribute in a tile’s neighbors. This reveals whether <em>spatial neighbors have similar dam attributes</em>—a key signal that observations are <strong>not independent</strong> (violating OLS assumptions).</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Critical: NA Handling in Spatial Lag Calculations
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Many tiles may have <strong>zero dams</strong> (NAs for attributes like mean_year_completed, mean_surface_area). When you compute the spatial lag via matrix multiplication, these NAs propagate and can cause <code>cor()</code> to fail with “no complete element pairs.”</p>
+<p><strong>Solution: Impute before spatial lag calculation</strong></p>
+<ol type="1">
+<li>Replace NAs in the attribute with the <strong>global mean</strong> (mean across all tiles, ignoring NAs)</li>
+<li>Compute the spatial lag on the imputed data</li>
+<li>When correlating, use <strong>only tiles that had original data</strong> (not imputed)</li>
+</ol>
+<p>This preserves statistical integrity: neighbors’ contributions are computed correctly, but you only correlate where real observations exist.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Suggested workflow (write your own implementation):</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) build vectors for count, age, and size attributes by tile</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) handle NAs explicitly before matrix multiplication</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) compute spatial lag as W_std %*% attribute</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) correlate each attribute with its lag</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 5) report values and classify as weak/moderate/strong with your own thresholds</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Summarize in a table</strong>:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a compact summary table with:</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="co"># - attribute name</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co"># - correlation with spatial lag</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># - qualitative strength label</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Then add a 1-2 sentence interpretation below the table.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-5.3" class="level3">
+<h3 class="anchored" data-anchor-id="step-5.3">Step 5.3</h3>
+<p><strong>Global Question:</strong> Do neighboring tiles resemble each other overall, or is the pattern weak?</p>
+<p>Create a single <strong>Moran’s I scatterplot</strong> for one dam attribute from Step 5.2 (for example, mean year completed or dam count). Use standardized values on both axes: the attribute on the x-axis and the spatial lag on the y-axis. The plot should show whether points concentrate along the diagonal or remain widely dispersed.</p>
+<p>Your interpretation should focus on the <strong>overall pattern</strong>, not on specific regions. In particular, explain whether the correlation from Step 5.2 suggests strong, moderate, or weak spatial dependence and whether the scatterplot supports that conclusion.</p>
+<p>Do <strong>not</strong> create a geographic map here. Save local hotspot mapping for Q6.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Standardization Details
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Why standardize?</strong> Centering and scaling puts the attribute and spatial lag on the same scale (mean=0, SD=1), making it easy to identify quadrants and interpret outliers.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scale</span>(x, <span class="at">center=</span><span class="cn">TRUE</span>, <span class="at">scale=</span><span class="cn">TRUE</span>)[, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a numeric vector (not a matrix). Use <code>[, 1]</code> to extract it, or use <code>as.vector()</code> explicitly.</p>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Suggested workflow (write your own implementation):</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) standardize the selected attribute and its spatial lag</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) assign HH / LL / HL / LH quadrants by sign of (z, lag_z)</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) produce a Moran scatterplot with dashed axes at 0</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) report quadrant counts and interpret what dominates</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="step-5.4" class="level3">
+<h3 class="anchored" data-anchor-id="step-5.4">Step 5.4</h3>
+<p><strong>Global Interpretation of Spatial Patterns</strong></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Writing Guide: Interpreting Spatial Correlation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use this structure to organize your response:</p>
+<ol type="1">
+<li><strong>State your findings clearly</strong> — cite specific correlation values from your Step 5.2 table. Which attributes show the strongest clustering?</li>
+<li><strong>Connect to structure</strong> — what does the scatterplot suggest about broad spatial organization, without moving into local mapping yet?</li>
+<li><strong>Explain why</strong> — relate to dam history, geology, hydrology, or policy at the regional scale</li>
+<li><strong>Analyze patterns</strong> — describe what the Moran scatterplot and correlation values reveal about overall dam distributions</li>
+</ol>
+</div>
+</div>
+<p>Write 2–3 paragraphs (400–600 words) addressing:</p>
+<p><strong>a. Spatial Clustering Patterns (Quantitative + Geographic)</strong></p>
+<p>Which attributes show the strongest spatial lag correlations (from your Step 5.2 table)? Are correlations &gt; 0.5 (strong) or 0.2–0.5 (moderate)?</p>
+<ul>
+<li><strong>Dam <em>count</em></strong>: Often strongly correlated because high dam density naturally creates neighbors with many dams.</li>
+<li><strong>Dam <em>age</em></strong>: Likely shows clustering if dams were built in regionally-coherent eras (e.g., 1930s TVA construction, 1960s–70s Western expansion).</li>
+<li><strong>Dam <em>size</em></strong>: May be clustered if geology/hydrology favors larger dams in specific regions.</li>
+</ul>
+<p>For each attribute, describe whether the clustering seems broad or weak. Does the correlation make geographic sense? Why should dam characteristics be similar in neighboring areas?</p>
+<p><strong>b. Moran Scatterplot Interpretation (Visualization)</strong></p>
+<p>From your Moran scatterplot, describe the spatial distribution of points:</p>
+<ul>
+<li>Do points cluster near the diagonal, suggesting positive spatial autocorrelation?</li>
+<li>Are there many outliers away from the diagonal, suggesting weaker dependence or heterogeneous neighborhoods?</li>
+<li>Does the pattern appear stronger for some attributes than others?</li>
+</ul>
+<p><strong>c.&nbsp;Spatial Structure Implications</strong></p>
+<p>What do these correlation values and Moran scatterplot patterns tell us about dam infrastructure spatial organization? Given your findings, write a brief conclusion synthesizing: - Are neighboring tiles genuinely similar in dam characteristics, or is the clustering weak? - What management or hydrologic factors drive these patterns? - How do findings from your Moran analysis here compare to what you observed in Q4 (dam purposes geography)?</p>
+<p><strong>Note</strong>: In future weeks, we’ll explore how spatial structure revealed here relates to statistical modeling of dam attributes.</p>
+</section>
+<section id="step-5.5-optional-hypothesis-checkpoint" class="level3">
+<h3 class="anchored" data-anchor-id="step-5.5-optional-hypothesis-checkpoint">Step 5.5 (Optional) — Hypothesis Checkpoint</h3>
+<p>Before moving to Q6, answer this question to verify your understanding:</p>
+<p><strong>Given your correlation results from Step 5.2, what do you expect to see in a Moran scatterplot (Q6)?</strong></p>
+<ul>
+<li>If all correlations are &gt; 0.5: Do you expect most points to cluster in the upper-right (HH) and lower-left (LL) quadrants, or scattered across all four?</li>
+<li>If correlations are weak (&lt; 0.3): Would you expect many High-Low or Low-High outliers?</li>
+<li>Based on dam geography (e.g., TVA region, Colorado River Basin), where do you predict hotspots (HH) and coldspots (LL) will concentrate?</li>
+</ul>
+<p>Write 2–3 sentences predicting Q6 outcomes before you compute LISA. After Q6, revisit this prediction to see if reality matched your expectation.</p>
+<hr>
+</section>
+</section>
+<section id="question-6-local-spatial-autocorrelation-lisa-mapping-hotspots-and-coldspots" class="level1">
+<h1>Question 6: Local Spatial Autocorrelation (LISA) — Mapping Hotspots and Coldspots</h1>
+<p><strong>In this question, you’ll analyze LISA using your recommended tessellation from Q3 AND counties as a required comparison unit.</strong> This contrast (regular tessellation vs administrative boundaries) reveals MAUP much more clearly than comparing two regular grids.</p>
+<p>While global statistics like Moran’s I (Q5) test for clustering “on average,” spatial patterns are <strong>rarely uniform</strong>. Some regions have dense hotspots (e.g., TVA region with concentrated dam infrastructure), while others are sparse coldspots (remote areas, deserts). <strong>Local Indicator of Spatial Autocorrelation (LISA)</strong> decomposes global clustering into local patterns, revealing <strong>where</strong> hotspots and coldspots occur—critical for targeted management interventions.</p>
+<p>In this question, you’ll compute LISA using your <strong>cropped recommended tessellation</strong> (from Q1.4) and <strong>CONUS counties</strong> as the alternative support. This gives a direct test of how local clustering changes when analysis units shift from equal-area tiles to administrative units.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>LISA Concept (Week 3-1 Lectures)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>LISA compares each tile’s <strong>standardized dam count</strong> (<span class="math inline">\(z_i\)</span>) to the <strong>standardized spatial lag</strong> (<span class="math inline">\(\text{lag}_z\)</span>):</p>
+<p><span class="math display">\[\text{lag}_z = \frac{1}{w_i} \sum_{j \in N(i)} w_{ij} z_j\]</span></p>
+<p>where neighbors <span class="math inline">\(j \in N(i)\)</span> are adjacent tiles, and <span class="math inline">\(w_{ij}\)</span> = row-standardized adjacency weight (1 if touching, 0 otherwise).</p>
+<p>The resulting <strong>LISA quadrants</strong> reveal: - <strong>High-High (HH)</strong>: High dam count, high-count neighbors → hotspot - <strong>Low-Low (LL)</strong>: Low dam count, low-count neighbors → coldspot<br>
+- <strong>High-Low (HL)</strong>: High count, low neighbors → potentially isolated cluster edge - <strong>Low-High (LH)</strong>: Low count, high neighbors → potential anomaly or outlier</p>
+</div>
+</div>
+<section id="step-6.1" class="level3">
+<h3 class="anchored" data-anchor-id="step-6.1">Step 6.1</h3>
+<p>Crop your tessellations to ensure consistent boundaries:</p>
+<p><strong>a.</strong> Use your recommended tessellation from Q3 (e.g., hexagon grid). Clip it to the CONUS boundary with <code>st_filter(tessellation, boundary)</code>.</p>
+<p><strong>b.</strong> Use <strong>counties</strong> as the required alternative comparison unit (no extra clipping needed if your counties object is already CONUS-only).</p>
+<p><strong>c.</strong> For each clipped tessellation, recompute dam counts using point-in-polygon joining to ensure correct aggregation within the cropped geometry.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Cropping Tessellations Correctly
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<pre><code># Recommended tessellation (e.g., hexagon_grid)
+hex_cropped &lt;- st_filter(hexagon_grid, usa_boundary)
+
+# Required comparison unit: counties (already CONUS)
+county_units &lt;- counties_sf
+
+# Recompute dam counts on cropped grids
+# (Use your point_in_polygon function or st_join + count pattern)
+hex_dams &lt;- st_join(hex_cropped, dams_sf) %&gt;%
+  group_by(id) %&gt;%
+  summarise(n = n(), .groups = "drop")
+
+county_dams &lt;- st_join(county_units, dams_sf) %&gt;%
+  group_by(id) %&gt;%
+  summarise(n = n(), .groups = "drop")</code></pre>
+<p><strong>Important</strong>: Cropping changes tile counts and boundary geometries. Re-aggregate dam counts <em>after</em> cropping to match the new tile geometry.</p>
+</div>
+</div>
+</section>
+<section id="step-6.2" class="level3">
+<h3 class="anchored" data-anchor-id="step-6.2">Step 6.2</h3>
+<p>Compute neighbors and spatial lag for your <strong>recommended tessellation</strong>:</p>
+<p><strong>a.</strong> Create the binary neighbor adjacency matrix using <code>st_touches(..., sparse = FALSE)</code>. Include only tiles within the cropped boundary.</p>
+<p><strong>b.</strong> Remove self-neighbors: <code>diag(W) &lt;- 0</code></p>
+<p><strong>c.</strong> Row-standardize weights: divide each row by its sum, handling isolated tiles.</p>
+<p><strong>d.</strong> Compute spatial lag: <span class="math inline">\(\text{lag} = W_{\text{std}} \times \text{dam\_counts}\)</span></p>
+<p><strong>e.</strong> Standardize both dam counts and spatial lag (z-score normalization).</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Validation Checkpoint (Optional but Recommended)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After computing the neighbor matrix, verify it’s valid:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check 1: Is the matrix symmetric? (for undirected adjacency)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(neighbor_matrix <span class="sc">==</span> <span class="fu">t</span>(neighbor_matrix))</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check 2: Are all rows row-standardized (divide by row sum)?</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rowSums</span>(neighbor_weights)  <span class="co"># Should all be 1 (or 0 for isolated tiles)</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check 3: Are there isolated tiles (no neighbors)?</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">rowSums</span>(neighbor_weights) <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co"># If any isolated tiles, document how you'll handle them in spatial lag calculation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+</section>
+<section id="step-6.3" class="level3">
+<h3 class="anchored" data-anchor-id="step-6.3">Step 6.3</h3>
+<p><strong>LOCAL Question: WHERE specifically are high-high, low-low, high-low, and low-high clusters?</strong> (Answer: Geographic map showing which regions belong to which quadrant)</p>
+<p><strong>Two Visualizations:</strong></p>
+<p><strong>a) Moran Scatterplot (Reference):</strong> - Same as Q5, showing which tile belongs to which quadrant - Primarily for reference; the interesting insight is now <em>geographic</em></p>
+<p><strong>b) LISA Geographic Map (PRIMARY OUTPUT):</strong> - Choropleth map of your tessellation colored by LISA quadrant - HH (red) = hotspots with hotspot neighbors → TVA region, Colorado Basin, etc. - LL (blue) = coldspots with coldspot neighbors → Great Basin, deserts, etc. - HL (yellow) = anomalies: high counts surrounded by sparse tiles (cluster edges) - LH (cyan) = anomalies: sparse tiles surrounded by high-count neighbors (rare)</p>
+<p><strong>Key Interpretation:</strong> The LISA map reveals <em>which specific regions</em> exhibit local clustering. This is actionable: dense regions need intensive management; sparse regions need different strategies. The quadrant distribution (% of tiles in HH vs.&nbsp;LL) reveals whether the landscape is dominated by hotspots, coldspots, or mixed.</p>
+</section>
+<section id="step-6.4" class="level3">
+<h3 class="anchored" data-anchor-id="step-6.4">Step 6.4</h3>
+<p><strong>Comparison with required county baseline</strong>:</p>
+<p><strong>a.</strong> Repeat Steps 6.2–6.3 for counties.</p>
+<p><strong>b. REQUIRED DELIVERABLE:</strong> Create side-by-side LISA maps of <strong>your chosen tessellation (from Q3)</strong> and <strong>counties</strong> in the same figure. Use identical quadrant labels and color mapping in both panels so visual differences reflect unit choice, not styling.</p>
+<p><strong>c.</strong> <strong>Quantitative comparison</strong>: For both units, count the number of polygons in each quadrant. Example output: - Hexagon: HH=15 tiles, LL=23 tiles, HL=5 tiles, LH=2 tiles - Counties: HH=205 counties, LL=1300 counties, HL=240 counties, LH=360 counties - <strong>Interpretation</strong>: Are quadrant distributions similar (robust LISA pattern) or different (MAUP sensitive at local scale)?</p>
+<p><strong>d.</strong> Interpret: Which unit reveals clustering more clearly for your purpose? Do patterns align between your chosen tessellation and counties, or does MAUP (modifiable areal unit problem) create divergent local structure?</p>
+</section>
+<section id="step-6.5" class="level3">
+<h3 class="anchored" data-anchor-id="step-6.5">Step 6.5</h3>
+<p><strong>Geographic Interpretation and Management Implications</strong></p>
+<p>Write a 3–4 paragraph synthesis addressing:</p>
+<p><strong>a.</strong> <strong>Geographic hotspots and coldspots</strong>: Identify major clustering regions: - Which dams are in HH hotspots? (E.g., TVA dams, Colorado River dams, others?) - Which regions are LL coldspots? (Mountains, deserts, sparse-development areas?) - What management or hydrologic factors explain these patterns?</p>
+<p><strong>Specific region example:</strong> Choose one HH hotspot (e.g., Tennessee Valley Authority region, Colorado River Basin, California Central Valley) and describe three factors that explain why TVA dams or Colorado River dams cluster. Use geographic knowledge or brief web research if needed.</p>
+<p><strong>b.</strong> <strong>Outliers and anomalies</strong>: Are there notable HL or LH tiles? What might explain them?</p>
+<p><strong>c.</strong> <strong>Unit comparison</strong>: Does analysis unit choice (hexagon vs. county) affect LISA conclusions? How does MAUP operate at the local scale?</p>
+<p><strong>d.</strong> <strong>Implications for management</strong>: How does LISA output inform dam operations, reporting, or policy? - Where should multi-state coordination efforts focus? (HH hotspots) - Which regions have simple management structures? (LL coldspots) - How do your LISA findings from Q6 compare to the dam purpose patterns you identified in Q4? (E.g., do irrigation dams cluster the same way as all dams?) - Where do policies need special attention to local anomalies? (HL/LH outliers)</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
