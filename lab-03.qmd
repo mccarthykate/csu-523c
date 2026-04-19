@@ -92,6 +92,7 @@ library(tidyverse) # data wrangling
 library(sf)        # Working with vector data
 library(rmapshaper)# Simplify geometries
 library(units)     # manage your units
+library(logger) # format and deliver log messages (for functions)
 
 # Data
 # remotes::install_github("mikejohnson51/AOI") # get US counties
@@ -101,6 +102,9 @@ library(AOI) # county boundaries
 library(gghighlight) # ggplot conditional highlighting
 library(knitr) # table generation
 library(kableExtra) # making tables pretty
+library(flextable)
+library(patchwork)
+library(cowplot)
 ```
 
 ------------------------------------------------------------------------
@@ -479,10 +483,10 @@ plot_counties(voronoi_counties, "Voronoi Tessellation")
 plot_counties(triangulated_counties, "Triangulated Tessellation")
 
 #grid 
-plot_counties(grid_counties, "Square Grid Tessellation")
+plot_counties(grid_counties, "Square Grid Coverage")
 
 #hex
-plot_counties(hex_counties, "Hexagon Grid Tessellation")
+plot_counties(hex_counties, "Hexagon Grid Coverage")
 
 ```
 
@@ -520,13 +524,48 @@ For this function:
 -   Return this `data.frame`
 
 ```{r}
+tes_summary <- function(arg1, arg2){
+  area_km2 <- arg1 %>% 
+    st_area() %>% 
+    set_units(km^2) %>% 
+    drop_units() 
+  
+  data.frame(
+    description = arg2, 
+    features = nrow(arg1), 
+    mean_area_km2 = round(mean(area_km2), digits = 2), 
+    sd_area_km2 = round(sd(area_km2), digits = 2), 
+    total_area_km2 = round(sum(area_km2), digits = 2)
+  )
+    
+}
 
+#arg 1 is the sf object 
+#arg 2 is the character string describing the object 
 ```
 
 ### Step 2.2
 
 Use your new function to summarize each of your tessellations and the
 original counties.
+
+```{r}
+CONUS_counties_sum <- tes_summary(CONUS_counties, "Continental U.S. Counties (Original)") 
+print(CONUS_counties_sum)
+
+voronoi_counties_sum <- tes_summary(voronoi_counties, "Voronoi Tessellation") 
+print(voronoi_counties_sum)
+
+triangulated_counties_sum <- tes_summary(triangulated_counties, "Triangulated Tessellation") 
+print(triangulated_counties_sum)
+
+grid_counties_sum <- tes_summary(grid_counties, "Square Grid Coverage") 
+print(grid_counties_sum)
+
+hex_counties_sum <- tes_summary(CONUS_counties, "Hexagonal Grid Coverage") 
+print(hex_counties_sum)
+```
+
 
 ### Step 2.3
 
@@ -536,11 +575,13 @@ single `data.frame`
 For example, if your function is called `sum_tess`, the following would
 bind your summaries of the triangulation and voroni object.
 
-```{r, eval = FALSE}
-bind_rows(
-  sum_tess(triangulate_grid, "triangulation"),
-  sum_tess(voronoi_grid, "voronoi")
-)
+```{r}
+tes_sum_all <- bind_rows(
+  tes_summary(CONUS_counties, "Continental U.S. Counties (Original)"), 
+  tes_summary(voronoi_counties, "Voronoi Tessellation"),
+  tes_summary(triangulated_counties, "Triangulated Tessellation"),
+  tes_summary(grid_counties, "Square Grid Coverage"), 
+  tes_summary(CONUS_counties, "Hexagonal Grid Coverage"))
 ```
 
 ### Step 2.4
@@ -551,7 +592,11 @@ raw counties) print the `data.frame` as a nice table using
 package.
 
 ```{r, echo = FALSE}
+tes_sum_ft <- flextable(tes_sum_all) %>% 
+  set_header_labels(description = "Description", features = "Number of Features", mean_area_km2 = "Mean Area (km^2)", sd_area_km2 = "Standard Deviation of Area (km^2)", total_area_km2 = "Total Area (km^2)") %>% 
+  set_caption(caption = "Summary of Tessellated Surfaces")
 
+tes_sum_ft
 ```
 
 ### Step 2.5
@@ -560,6 +605,8 @@ Comment on the traits of each tessellation. Be specific about how these
 traits might impact the results of a point-in-polygon analysis in the
 contexts of the modifiable areal unit problem and with respect
 computational requirements.
+
+> ...
 
 ------------------------------------------------------------------------
 
@@ -687,8 +734,49 @@ object with a column - `n` - counting the number of points in each tile.
 :::
 
 ```{r}
+point_in_poly <- function(points, polygon, id_col) {
+ 
+  #check if both points and polygons are sf objects and ID column exists 
+  tryCatch({
+    if (!inherits(points, "sf")) stop("points must be an sf object")
+    if (!inherits(polygon, "sf")) stop("polygon must be sf object")
+    if (!id_col %in% names(polygon)) stop(paste("variable", id_col, "not found"))
+    log_debug("Inputs validated successfully")
+  }, error = function(e) {
+    log_error("inputs validation failed: {e$message}")
+    stop(e)
+  })
+  #check if both points and polygons are in the same CRS 
+  tryCatch({
+    if (st_crs(points) != st_crs(polygon)) {
+      print("CRS don't match, transforming points to polygon CRS")
+    }
+    points <- st_transform(points, st_crs(polygon))
+  }, error = function(e) { 
+    print(paste("CRS tranformation failed:", e$message))
+    stop(e)
+    })
+  #point in polygon 
+  tryCatch({
+    log_debug("performing spatial join...")
+    result <- st_join(polygon, points) %>% 
+    st_drop_geometry() %>% 
+    count(get(id_col)) %>% 
+    setNames(c(id_col, "n")) %>% 
+    left_join(polygon, by = id_col) %>% 
+    st_as_sf()
+    
+    log_info("success! {nrow(result)} polygons returned")
+    result 
+  }, error = function(e) {
+    log_error("spatial join failed :( {e$message}")
+    stop(e)
+    })
+}
+
 
 ```
+
 
 ### Step 3.3
 
@@ -700,7 +788,14 @@ surfaces where:
 -   The id column is the name of the id columns you defined.
 
 ```{r}
+#function found no "ID" column in CONUS_counties, need to add 
+CONUS_counties <- mutate(CONUS_counties, ID = 1:n())
 
+CONUS_pip <- point_in_poly(dams2, CONUS_counties, id_col = "ID")
+voronoi_pip <- point_in_poly(dams2, voronoi_counties, id_col = "ID")
+triangulated_pip <- point_in_poly(dams2, triangulated_counties, id_col = "ID")
+grid_pip <- point_in_poly(dams2, grid_counties, id_col = "ID")
+hex_pip <- point_in_poly(dams2, hex_counties, id_col = "ID")
 ```
 
 ### Step 3.4
@@ -732,6 +827,24 @@ For this function:
             together.
 
 ```{r}
+#figure out max number of log10(n) to determine common scale 
+max(log10(CONUS_pip$n))
+max(log10(voronoi_pip$n))
+max(log10(triangulated_pip$n))
+max(log10(grid_pip$n))
+max(log10(hex_pip$n))
+
+#make function
+pip_plot <- function(sf_object, title) {
+  plot <- ggplot(data = sf_object) + 
+    geom_sf(mapping = aes(fill = log10(n))) +  #had to use log10 because the scale fill was not visually depitcting the differences well 
+    scale_fill_viridis_c(limits = c(0,2.8)) + 
+    theme_void() + 
+    labs(caption = paste("The number of dams is", sum(sf_object$n)),
+         title = paste(title), 
+         fill = "Common Log Value of Dams")
+  return(plot)
+}
 
 ```
 
@@ -739,6 +852,22 @@ For this function:
 
 Apply your plotting function to each of the 5 tessellated surfaces with
 Point-in-Polygon counts:
+
+```{r}
+CONUS_pip_plot <- pip_plot(CONUS_pip, "Continental U.S. Counties with Dams")
+voronoi_pip_plot <- pip_plot(voronoi_pip, "Voronoi Tessellation with Dams")
+triangulated_pip_plot <- pip_plot(triangulated_pip, "Delaunay Triangulated Tessellation with Dams")
+grid_pip_plot <- pip_plot(grid_pip, "Square Grid Coverage with Dams")
+hex_pip_plot <- pip_plot(hex_pip, "Hexagonal Grid Coverage with Dams")
+
+CONUS_pip_plot
+voronoi_pip_plot
+triangulated_pip_plot
+grid_pip_plot
+hex_pip_plot
+
+```
+
 
 ### Step 3.6
 
@@ -779,8 +908,14 @@ visualizations and patterns you observe from your tessellation
 comparisons.
 
 ```{r}
+combined_pip_plot <- wrap_plots(CONUS_pip_plot, voronoi_pip_plot, triangulated_pip_plot, grid_pip_plot, hex_pip_plot, ncol = 3) + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom")
 
+combined_pip_plot
 ```
+
+> ... 
 
 ------------------------------------------------------------------------
 
@@ -834,7 +969,9 @@ knitr::kable(nid_classifier,
     of dam purposes:
 
 ```{r, echo = TRUE, eval = TRUE}
-unique(dams2$PURPOSES) %>% length()
+unique(dams2$purposes) %>% length()
+
+#574 unique dam purposes
 ```
 
 -   By storing dam codes as a concatenated string, there is no easy way
@@ -853,7 +990,7 @@ serve:
 #| echo: false
 #| eval: false
 # create a vector of all characters in your purpose and unlist 
-dam_freq <- strsplit(dams2$PURPOSES, split = "") %>%
+dam_freq <- strsplit(dams2$purposes, split = "") %>%
   unlist() %>% 
   table() %>% 
   as.data.frame() %>% 
@@ -898,8 +1035,8 @@ For example:
 #| echo: true
 #| eval: true
 # Find flood control dams in the first 5 records:
-dams2$PURPOSES[1:5]
-grepl("F", dams2$PURPOSES[1:5])
+dams2$purposes[1:5] 
+grepl("F", dams2$purposes[1:5])
 ```
 
 ------------------------------------------------------------------------
@@ -913,6 +1050,21 @@ across your **cropped tessellation from Q1.4** (e.g., `hexagon_clipped`
 or `square_clipped`).
 
 ```{r}
+#purposes chosen: recreation, flood risk reduction, fish and wildlife, fire protection
+recreation_dams <- dams2 %>% 
+  filter(grepl("Recreation", purposes, ignore.case = TRUE))
+flood_dams <- dams2 %>% 
+  filter(grepl("Flood Risk Reduction", purposes, ignore.case = TRUE))
+water_supply_dams <- dams2 %>% 
+  filter(grepl("Water Supply", purposes, ignore.case = TRUE))
+fire_dams <- dams2 %>% 
+  filter(grepl("Fire Protection", purposes, ignore.case = TRUE))
+
+#subset across tessellations 
+recreation_count <- point_in_poly(recreation_dams, hex_pip, id_col = "ID")
+flood_count <- point_in_poly(flood_dams, hex_pip, id_col = "ID")
+water_supply_count <- point_in_poly(water_supply_dams, hex_pip, id_col = "ID")
+fire_count <- point_in_poly(fire_dams, hex_pip, id_col = "ID")
 
 ```
 
@@ -932,7 +1084,37 @@ or `square_clipped`).
     country with the most
 
 ```{r}
+#making sure old scale of ggplot function works with this data 
+max(log10(flood_count$n.y))
+max(log10(fire_count$n.y))
+max(log10(recreation_count$n.y))
+max(log10(water_supply_count$n.y))
 
+fire_dams_plot <- pip_plot(fire_count, "Distribution of Dams for Fire Protection by County")
+
+recreation_dams_plot <-
+
+water_supply_dams_plot <- pip_plot(water_supply_count, "Distribution of Dams for Water Supply by County")
+
+flood_dams_plot <- pip_plot(flood_count, "Distribution of Dams for Flood Risk Reduction by County")
+
+fire_dams_plot
+recreation_dams_plot
+water_supply_dams_plot
+flood_dams_plot
+
+patchwork::wrap_plots(
+  pip_plot(fire_count, "Distribution of Dams for Fire Protection by County") + 
+    gghighlight(n > (mean(n) + sd(n))),
+  pip_plot(recreation_count, "Distribution of Dams for Recreation by County") + 
+    gghighlight(n > (mean(n) + sd(n))),
+  pip_plot(water_supply_count, "Distribution of Dams for Water Supply by County") + 
+    gghighlight(n > (mean(n) + sd(n))),
+  pip_plot(flood_count, "Distribution of Dams for Flood Risk Reduction by County") +
+    gghighlight(n > (mean(n) + sd(n))),
+   ncol = 2) + 
+  plot_annotation(title = "Hotspots of Dam Purposes",
+                  subtitle = "Only tiles with counts above mean + 1 SD are highlighted")
 ```
 
 ### Step 4.3
@@ -942,10 +1124,14 @@ sense? How might the tessellation you chose impact your findings? How
 does the distribution of dams coincide with other geographic factors
 such as river systems, climate, ect?
 
+> ... 
+
 **Optional: Connect to Q6** — For purposes you chose in Q4, hypothesize
 in 1–2 sentences: *"Will \[irrigation/hydroelectric\] dams show the same
 LISA hotspots as all dams in Q6, or different patterns? Why?"* After
 completing Q6, revisit this hypothesis.
+
+> ... 
 
 # Question 5: Spatial Correlation of Dam Attributes — Introduction to Spatial Regression
 
@@ -1178,12 +1364,11 @@ management or hydrologic factors drive these patterns? - How do findings
 from your Moran analysis here compare to what you observed in Q4 (dam
 purposes geography)?
 
+> answers a-c:  
+
 **Note**: In future weeks, we'll explore how spatial structure revealed
 here relates to statistical modeling of dam attributes.
 
-```{r}
-
-```
 
 ### Step 5.5 (Optional) — Hypothesis Checkpoint
 
@@ -1204,6 +1389,8 @@ see in a Moran scatterplot (Q6)?**
 Write 2–3 sentences predicting Q6 outcomes before you compute LISA.
 After Q6, revisit this prediction to see if reality matched your
 expectation.
+
+> ...
 
 ------------------------------------------------------------------------
 
