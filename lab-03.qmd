@@ -105,6 +105,7 @@ library(kableExtra) # making tables pretty
 library(flextable)
 library(patchwork)
 library(cowplot)
+library(egg) #ggarrange 
 ```
 
 ------------------------------------------------------------------------
@@ -354,7 +355,11 @@ mapview::npts(boundary_simplified) #287 points
 mapview::npts(CONUS_border) #11292 points 
 ```
 
-> I was able to remove a little over 11,000 points from the boundary through simplification. This means there will be fewer computaions, which will make any calculations run faster. However, this may not capture fine details along the coastline, so it's important to simplify based on the computational objective. 
+> I was able to remove a little over 11,000 points from the boundary
+> through simplification. This means there will be fewer computaions,
+> which will make any calculations run faster. However, this may not
+> capture fine details along the coastline, so it's important to
+> simplify based on the computational objective.
 
 -   Finally, crop **all four grids** to the CONUS boundary—but using
     different methods:
@@ -566,7 +571,6 @@ hex_counties_sum <- tes_summary(CONUS_counties, "Hexagonal Grid Coverage")
 print(hex_counties_sum)
 ```
 
-
 ### Step 2.3
 
 Multiple `data.frame` objects can bound row-wise with `bind_rows` into a
@@ -756,15 +760,19 @@ point_in_poly <- function(points, polygon, id_col) {
     print(paste("CRS tranformation failed:", e$message))
     stop(e)
     })
+  #attempt to fix 
+  polygon_clean <- polygon %>% 
+      select(all_of(id_col))
   #point in polygon 
   tryCatch({
     log_debug("performing spatial join...")
-    result <- st_join(polygon, points) %>% 
-    st_drop_geometry() %>% 
-    count(get(id_col)) %>% 
-    setNames(c(id_col, "n")) %>% 
-    left_join(polygon, by = id_col) %>% 
-    st_as_sf()
+    result <- st_join(polygon_clean, points) %>% 
+      st_drop_geometry() %>% 
+      group_by(get(id_col)) %>%
+      summarise(n = n(), .groups = "drop") %>%
+      setNames(c(id_col, "n")) %>%
+      left_join(polygon_clean, by = id_col) %>% 
+      st_as_sf()
     
     log_info("success! {nrow(result)} polygons returned")
     result 
@@ -776,7 +784,6 @@ point_in_poly <- function(points, polygon, id_col) {
 
 
 ```
-
 
 ### Step 3.3
 
@@ -868,7 +875,6 @@ hex_pip_plot
 
 ```
 
-
 ### Step 3.6
 
 **Policy Analysis: Tessellation and Decision-Making**
@@ -915,7 +921,7 @@ combined_pip_plot <- wrap_plots(CONUS_pip_plot, voronoi_pip_plot, triangulated_p
 combined_pip_plot
 ```
 
-> ... 
+> ...
 
 ------------------------------------------------------------------------
 
@@ -1085,23 +1091,11 @@ fire_count <- point_in_poly(fire_dams, hex_pip, id_col = "ID")
 
 ```{r}
 #making sure old scale of ggplot function works with this data 
-max(log10(flood_count$n.y))
-max(log10(fire_count$n.y))
-max(log10(recreation_count$n.y))
-max(log10(water_supply_count$n.y))
+max(log10(flood_count$n))
+max(log10(fire_count$n))
+max(log10(recreation_count$n))
+max(log10(water_supply_count$n))
 
-fire_dams_plot <- pip_plot(fire_count, "Distribution of Dams for Fire Protection by County")
-
-recreation_dams_plot <-
-
-water_supply_dams_plot <- pip_plot(water_supply_count, "Distribution of Dams for Water Supply by County")
-
-flood_dams_plot <- pip_plot(flood_count, "Distribution of Dams for Flood Risk Reduction by County")
-
-fire_dams_plot
-recreation_dams_plot
-water_supply_dams_plot
-flood_dams_plot
 
 patchwork::wrap_plots(
   pip_plot(fire_count, "Distribution of Dams for Fire Protection by County") + 
@@ -1124,14 +1118,16 @@ sense? How might the tessellation you chose impact your findings? How
 does the distribution of dams coincide with other geographic factors
 such as river systems, climate, ect?
 
-> ... 
-
-**Optional: Connect to Q6** — For purposes you chose in Q4, hypothesize
-in 1–2 sentences: *"Will \[irrigation/hydroelectric\] dams show the same
-LISA hotspots as all dams in Q6, or different patterns? Why?"* After
-completing Q6, revisit this hypothesis.
-
-> ... 
+> I was suprised to see that there were a larger distrubution of dams
+> for water supply on the east coast. I would have expected there to be
+> more dams for water supply purposes in the west because of the lack of
+> water compared to the east coast. There is some overlap between the
+> distribution of dams for fire protection and those for flood risk.
+> This makes sense because wildfires increase the risk of flood
+> occurance. Tessellation choice impacts how dams are clustered, and
+> thus influences the patterns seen on a national-scale. A more fine
+> tessellation would reveal localized concentarions, whereas a coarse
+> tessellation reveals more broad patterns.
 
 # Question 5: Spatial Correlation of Dam Attributes — Introduction to Spatial Regression
 
@@ -1198,8 +1194,48 @@ Do you see geographic clustering of old vs. new dams? Large vs. small
 dams?
 
 ```{r}
+aggregated_dams <- st_join(hex_pip, dams2) %>% 
+  group_by(ID) %>% 
+  summarize(n_dams = n(),
+    mean_year_completed = mean(year_completed, na.rm = TRUE),
+    mean_surface_area = mean(surface_area_acres, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  st_as_sf()
 
+#map 1
+ag_dam_age <- ggplot(data = aggregated_dams) + 
+  geom_sf(mapping = aes(fill = mean_year_completed)) + 
+  scale_fill_viridis_c() + 
+  theme_void() + 
+  labs(title = "Average Year Completed by Tile", 
+       fill = "Mean Year of Dam Completion")
+
+#map 2
+ag_dam_SA <- ggplot(data = aggregated_dams) + 
+  geom_sf(mapping = aes(fill = log10(mean_surface_area))) + 
+  scale_fill_viridis_c() + 
+  theme_void() + 
+  labs(title = "Average Dam Surface Area by Tile", 
+       fill = "Log10 of Dam Mean Surface Area")
+  
+#map 3
+ag_dam_count <- ggplot(data = aggregated_dams) + 
+  geom_sf(mapping = aes(fill = log10(n_dams))) + 
+  scale_fill_viridis_c() + 
+  theme_void() + 
+  labs(title = "Number of Dams per Tile", 
+       fill = "Log10 Number of Dams")
 ```
+
+> There is some geographic clustering when it comes to when the dams
+> were completed. Newer dams are more commonly found in the west, with
+> more older dams being in the east. There are a few exceptions to this
+> in California, Montana and Colorado, but these are all states without
+> an ample water supply, so it makes sense that they would have some
+> older dams as well. Most of the dams in the U.S. have a similar mean
+> surface area, wuth some concentrations of larger dams in the northern
+> midwest region. Dams are most commonly concentrated in the mid west,
+> as well as along the Appalacian Mountain region.
 
 ### Step 5.2
 
@@ -1242,6 +1278,39 @@ exist.
 # 5) report values and classify as weak/moderate/strong with your own thresholds
 ```
 
+```{r}
+#build vectors for count, age and size attributes 
+count_vector <- aggregated_dams$n_dams
+age_vector <- aggregated_dams$mean_year_completed
+size_vector <- aggregated_dams$mean_surface_area
+
+#handle NAs
+unique(is.na(count_vector)) #no NAs
+unique(is.na(age_vector)) #yes NAs
+unique(is.na(size_vector)) #yes NAs
+
+age_vector_impute <- ifelse(is.na(age_vector), mean(age_vector, na.rm = TRUE), age_vector)
+size_vector_impute <- ifelse(is.na(size_vector), mean(size_vector, na.rm = TRUE), size_vector)
+
+unique(is.na(age_vector_impute)) #no NAs
+unique(is.na(size_vector_impute)) #no NAs
+
+#compute spatial lag 
+W <- st_touches(aggregated_dams, sparse = FALSE)
+diag(W) <- 0
+row_sums <- rowSums(W)
+row_sums[row_sums == 0] <- 1
+W_std <- W / row_sums
+
+lag_count <- as.vector(W_std %*% count_vector)
+lag_age <- as.vector(W_std %*% age_vector_impute)
+lag_size <- as.vector(W_std %*% size_vector_impute)
+
+correlate_count <- cor(count_vector, lag_count) #0.839
+correlate_age <- cor(age_vector, lag_age, use = "complete.obs") #0.659
+correlate_size<- cor(size_vector, lag_size, use = "complete.obs") #-0.001
+```
+
 **Summarize in a table**:
 
 ```{r}
@@ -1254,8 +1323,26 @@ exist.
 ```
 
 ```{r}
+dams_summary <- data.frame(attribute = c("Dam Count", "Mean Year Completed", "Mean Surface Area"),
+                           correlation = c(round(correlate_count, digits = 3), round(correlate_age, digits = 3), round(correlate_size, digits = 3)), 
+                           strength = c(ifelse(correlate_count > 0.6, "Strong", ifelse(correlate_count > 0.3, "Moderate", "Weak")), 
+                                        ifelse(correlate_age > 0.6, "Strong", ifelse(correlate_age > 0.3, "Moderate", "Weak")), 
+                                        ifelse(correlate_size > 0.6, "Strong", ifelse(correlate_size > 0.3, "Moderate", "Weak"))))
 
+
+dams_summary_ft <- flextable(dams_summary) %>% 
+  set_caption(caption = "Dam Attributes Correlation Summary") %>% 
+  set_header_labels(attribute = "Attribute", correlation = "Correlation", strength = "Strength")
+
+dams_summary_ft
 ```
+
+> The attributes of dam count and mean year completed show a strong
+> positive correlation between neighboring tiles. This means that areas
+> close together have a similar number of dams and a similar year of
+> completion. Surface area appears to have practically no correlation,
+> which means that other factors liekly play a role in dam size, such as
+> water supply needs or basin extent.
 
 ### Step 5.3
 
@@ -1301,8 +1388,43 @@ use `as.vector()` explicitly.
 ```
 
 ```{r}
+#standardize by age (chosen attribute)
+standardized_age <- scale(age_vector_impute, center = TRUE, scale = TRUE)[, 1] #make sure to pick impute vector to remove NA's 
+standardized_lag_age <- scale(lag_age, center = TRUE, scale = TRUE)[, 1]
 
+#assign quadrants
+quadrant <- case_when(
+  standardized_age > 0 & standardized_lag_age > 0 ~ "HH",
+  standardized_age > 0 & standardized_lag_age < 0 ~ "HL",
+  standardized_age < 0 & standardized_lag_age < 0 ~ "LL",
+  standardized_age < 0 & standardized_lag_age > 0 ~ "LH")
+
+
+moran_plot <- ggplot() +
+  geom_point(mapping = aes(x = standardized_age, y = standardized_lag_age, color = quadrant)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_brewer(palette = "Paired") +
+  labs(title = "Dam Age Spatial Correlation",
+       subtitle = "Moran's I Scatterplot",
+       x = "Standardized Dam Age", 
+       y = "Spatial Lag", 
+       color = "Quadrant") +
+  theme_bw()
+
+moran_plot
+
+table(quadrant)
+
+(967+626) / (967+626+243+267) #76% of points in HH and LL quads
 ```
+
+> I chose dam age as my attribute, which has a strong correlation factor
+> of 0.659. This is also reflected in the Moran's I scatterplot with 76%
+> of values falling within the HH and LL quadrants (967 and 626 points,
+> respectively). These two quadrants represent dams that have a positive
+> spatial correlation of dam age. Therefore, the scatterplot supports
+> the strong spatial correlation factor calculated previously.
 
 ### Step 5.4
 
@@ -1364,11 +1486,52 @@ management or hydrologic factors drive these patterns? - How do findings
 from your Moran analysis here compare to what you observed in Q4 (dam
 purposes geography)?
 
-> answers a-c:  
+> I chose dam age as my attribute. Dam age had a correlation value of
+> 0.659, which demonstrates strong spatial correlation. This means that
+> dams are likely surrounded by dams of a similar age: older dams with
+> older dams and younger dams with younger dams. This makese sense
+> because it likely shows clustering of dams that were built in
+> regionally-coherent eras (e.g., 1930s TVA construction, 1960s–70s
+> Western expansion) The strongest clustering was shown by dam count,
+> which had a correlation value of 0.839. This means that there is a
+> strong spatial correlation by dam count. Therefore, regions with
+> higher concentration of dams are surrounded by similarly-concentrated
+> regions. Dam count is often strongly correlated because high dam
+> density naturally creates neighbors with many dams. Mean surface area
+> had almost no correlation, which means that dam size is not spatially
+> correlated. Dam size is likely controlled by basin extent or water
+> supply needs, which might not have a relationship spatially. These
+> dams are likely not clustered if the geology/hydrology varies greatly
+> in the region, which would create a need for different dam sizes
+> spatially.
+
+> In the Moran's I scatterplot, the points cluster near the diagonal,
+> which suggests that there is a positive spatial correlation with dam
+> age. 76% of points in the plot fall in teh HH and LL quadrants, which
+> demonstrates a positive spatial association. This reinforces the
+> strong spatial correlation (0.659) of dam size, as previously
+> calculated. There are some outliers away from the diagonal, with more
+> deviation further from (0,0) on the Moran's plot. These outliers
+> suggest that there are regions across the U.S. where there isn't a
+> strong spatial correlation by dam age. This pattern is likely not as
+> strong as the spatial correlation for dam count, which has a strong
+> correlation (0.839). This pattern is, however, considerably stronger
+> than dam surface area, which has a weak correlation (-0.001).
+
+> The correlation value and Moran scatterplot pattern of dam age
+> demonstrates that there is a relatively strong spatial correlation by
+> dam age. Dams are often built along a river system, which would likely
+> occur around the same time. For example, during a large dam expansion
+> between 1945 and 1975, 150 dams were built on the Columbia, Missouri,
+> and Colorado River Basins. Dam infrastructure patterns therefore
+> influences the spatial correlation of dam age. Dam count is also
+> highly spatially correlated, which is explained by river management's
+> construction of dams along basins. Dam age appeared to be more
+> spatially correlated than the either of the purposes examined
+> previously.
 
 **Note**: In future weeks, we'll explore how spatial structure revealed
 here relates to statistical modeling of dam attributes.
-
 
 ### Step 5.5 (Optional) — Hypothesis Checkpoint
 
@@ -1389,8 +1552,6 @@ see in a Moran scatterplot (Q6)?**
 Write 2–3 sentences predicting Q6 outcomes before you compute LISA.
 After Q6, revisit this prediction to see if reality matched your
 expectation.
-
-> ...
 
 ------------------------------------------------------------------------
 
@@ -1473,6 +1634,18 @@ Re-aggregate dam counts *after* cropping to match the new tile geometry.
 :::
 
 ```{r}
+#crop tessellation to conus
+hex_cropped <- st_filter(hex_pip, CONUS_border)
+
+#recalc dam counts on cropped tess
+hex_dams_cropped <- st_join(hex_cropped, dams2) %>%
+  group_by(ID) %>%
+  summarise(n = n(), .groups = "drop")
+
+#recalc dams for counties 
+county_dams <- st_join(CONUS_counties, dams2) %>%
+  group_by(ID) %>%
+  summarise(n = n(), .groups = "drop") 
 
 ```
 
@@ -1517,6 +1690,30 @@ sum(rowSums(neighbor_weights) == 0)
 
 ```{r}
 
+#create binary neighbor adjacency matrix
+W_crop <- st_touches(hex_dams_cropped, sparse = FALSE)
+diag(W_crop) <- 0 #remove self neighbors 
+row_sums_crop <- rowSums(W_crop)
+row_sums_crop[row_sums_crop == 0] <- 1 
+W_std_crop <- W_crop/row_sums_crop #row-standardized weights
+
+hex_dams_count <- hex_dams_cropped$n
+
+lag_hex <- as.vector(W_std_crop %*% hex_dams_count)
+
+#standardize dam counts and spatial lag 
+standardized_hex <- scale(hex_dams_count, center = TRUE, scale = TRUE)[, 1] 
+standardized_lag_hex <- scale(lag_hex, center = TRUE, scale = TRUE)[, 1]
+
+hex_quadrant <- case_when(
+  standardized_hex > 0 & standardized_lag_hex > 0 ~ "HH",
+  standardized_hex < 0 & standardized_lag_hex < 0 ~ "LL",
+  standardized_hex > 0 & standardized_lag_hex < 0 ~ "HL",
+  standardized_hex < 0 & standardized_lag_hex > 0 ~ "LH")
+
+
+hex_lisa <- hex_dams_cropped %>%
+  mutate(quadrant = hex_quadrant)
 ```
 
 ### Step 6.3
@@ -1546,7 +1743,27 @@ quadrant distribution (% of tiles in HH vs. LL) reveals whether the
 landscape is dominated by hotspots, coldspots, or mixed.
 
 ```{r}
+moran_plot_hex <- ggplot() +
+  geom_point(mapping = aes(x = standardized_hex, y = standardized_lag_hex, color = hex_quadrant)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_brewer(palette = "Paired") +
+  labs(title = "Dam Count Spatial Correlation",
+       subtitle = "Moran's I Scatterplot",
+       x = "Standardized Dam Count", 
+       y = "Spatial Lag", 
+       color = "Quadrant") +
+  theme_bw()
 
+moran_plot_hex
+
+hex_lisa_plot <- ggplot(hex_lisa) +
+  geom_sf(aes(fill = quadrant), color = NA) +
+  scale_fill_manual(values = c("HH" = "darkred", "LL" = "dodgerblue4", "HL" = "goldenrod1", "LH" = "cyan3")) +
+  labs(title = "LISA Map: Hexagonal", fill = "Quadrant") + 
+  theme_void()
+
+hex_lisa_plot
 ```
 
 ### Step 6.4
@@ -1573,8 +1790,46 @@ counties, or does MAUP (modifiable areal unit problem) create divergent
 local structure?
 
 ```{r}
+#repeat steps 6.2-6.3 for counties 
+W_counties <- st_touches(county_dams, sparse = FALSE)
+diag(W_counties) <- 0  
+row_sums_counties <- rowSums(W_counties)
+row_sums_counties[row_sums_counties == 0] <- 1 
+W_std_counties <- W_counties/row_sums_counties 
 
+county_dams_count <- county_dams$n
+
+lag_county <- as.vector(W_std_counties %*% county_dams_count)
+
+standardized_county <- scale(county_dams_count, center = TRUE, scale = TRUE)[, 1] 
+standardized_lag_county <- scale(lag_county, center = TRUE, scale = TRUE)[, 1]
+
+county_quadrant <- case_when(
+  standardized_county > 0 & standardized_lag_county > 0 ~ "HH",
+  standardized_county < 0 & standardized_lag_county < 0 ~ "LL",
+  standardized_county > 0 & standardized_lag_county < 0 ~ "HL",
+  standardized_county < 0 & standardized_lag_county > 0 ~ "LH")
+
+county_lisa <- county_dams %>%
+  mutate(quadrant = county_quadrant)
+
+county_lisa_plot <- ggplot(county_lisa) +
+  geom_sf(aes(fill = quadrant), color = NA) +
+  scale_fill_manual(values = c("HH" = "darkred", "LL" = "dodgerblue4", "HL" = "goldenrod1", "LH" = "cyan3")) +
+  labs(title = "LISA Map: Counties", fill = "Quadrant") + 
+  theme_void()
+
+#create side-by-side LISA maps 
+ggarrange(hex_lisa_plot, county_lisa_plot, nrow = 1)
+
+#count units 
+table(county_lisa$quadrant)
+
+table(hex_lisa$quadrant)
 ```
+
+> Quadrant distributions for the LISA maps are different between the two tessellations. On the hexagonal LISA map, there is more clear clustering. The concentration of dams on parts of the west coast practically dissappears in the hexagonal tessellation, because larger county size can influence interpretation of dam concentration. The county tessellation LISA map shows a more divergent local structure compared to the hexagonal tessellation. 
+
 
 ### Step 6.5
 
@@ -1609,6 +1864,4 @@ Q6 compare to the dam purpose patterns you identified in Q4? (E.g., do
 irrigation dams cluster the same way as all dams?) - Where do policies
 need special attention to local anomalies? (HL/LH outliers)
 
-```{r}
-
-```
+> answer: 
