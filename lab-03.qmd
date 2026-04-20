@@ -610,7 +610,22 @@ traits might impact the results of a point-in-polygon analysis in the
 contexts of the modifiable areal unit problem and with respect
 computational requirements.
 
-> ...
+> The five different tessellations produce different tile
+> characteristics. The voronoi tessellation creates irregular polygons
+> from the centroids of counties, representing their spatial
+> distribution. These boundaries, however, can be arbitrary depending on
+> the analysis conducted. The triangulated tessellation creates the most
+> tiles, creating 6,198 in this case. This tessellation revelas
+> fine-scale clustering, but the smaller tiles risk over-fragmentation.
+> Dams appear "more clustered" because of the smaller tile size. Square
+> and hexagonal grids create uniform tiles to reinfove regularity. These
+> boundaries are completely arbitrary and don't align with hydrologic
+> boundary features. The original counties represent the data meaningful
+> to governance of dams, but county size effects the appeared
+> distribution of dams. For point-in-polygon results, dams in larger
+> counties appear spread out compared to the same number in a smaller
+> county. This effects how concentrated the dams appear on the county
+> map.
 
 ------------------------------------------------------------------------
 
@@ -921,7 +936,44 @@ combined_pip_plot <- wrap_plots(CONUS_pip_plot, voronoi_pip_plot, triangulated_p
 combined_pip_plot
 ```
 
-> ...
+> b.  In the Pacific Northwest, the concentration of dams appears to be
+>     stronger in the county and Voronoi tessellations compared to the
+>     others. These tessellations are the closest in size and number, so
+>     it would make sense that these two tessellations would be most
+>     similar. In the Midwest, the concentration of dams is stronger in
+>     the two gridded tessellations compared to counties, Voronoi, and
+>     Delauney tessellations. Because the gridded tessellations average
+>     tiles of the same size, they could depict concentrations of dams
+>     that are lost in small tiles from the county, Voronoi, or Delauney
+>     tessellations. Lastly, in New England, the Delauney triangulated
+>     tessellation greatly reduces the concentration of dams compared to
+>     the rest of the tessellations. It appears that this tessellation
+>     has the most tiles in this region, which would minimize the
+>     concentration of previously-larger tiles.
+
+> c.  I recommend the Voronoi tessellation for dam operations planning.
+>     The Voronoi method best aligns with a manager's actual
+>     decision-making reality because dam operations are fundamentally
+>     tied to their river basins, as opposed to administrative
+>     boundaries, like county lines. Although the tiles don't explicitly
+>     represent watershed basins, they do respect spatial distribution
+>     of dams by clustering nearby dams into tiles. Using the gridded
+>     coverages would result not as clearly represent watershed basins.
+>     However, a coarser tessellation like the square or hexagonal grids
+>     would be better for national-scale management decisions. I chose
+>     to keep 2.5% of vertices when simplifying the CONUS border, which
+>     kept much of the necessary details, while improving calculation
+>     speeds. The new border is still a good option for the Voronoi
+>     tessellation because it the tiles can perfectly fill the new
+>     boundary. A coarser simplification (0.1–1%) would further speed up
+>     calculation, but there is risk of clipping any dams along the new
+>     border. A finer simplification (5–10%) would preserve coastal
+>     detail but wouldn't be worth the loss in computational speeds,
+>     especially seeing as coastal dams are relatively rare. Depending
+>     on what the management needs are changes the best tessellation for
+>     the situation. For example, if the dam operations manager needs to
+>     make decisions based on local regulations, it would be important
+>     to choose a tessellation that aligns with jurisdictions.
 
 ------------------------------------------------------------------------
 
@@ -1828,8 +1880,13 @@ table(county_lisa$quadrant)
 table(hex_lisa$quadrant)
 ```
 
-> Quadrant distributions for the LISA maps are different between the two tessellations. On the hexagonal LISA map, there is more clear clustering. The concentration of dams on parts of the west coast practically dissappears in the hexagonal tessellation, because larger county size can influence interpretation of dam concentration. The county tessellation LISA map shows a more divergent local structure compared to the hexagonal tessellation. 
-
+> Quadrant distributions for the LISA maps are different between the two
+> tessellations. On the hexagonal LISA map, there is more clear
+> clustering. The concentration of dams on parts of the west coast
+> practically dissappears in the hexagonal tessellation, because larger
+> county size can influence interpretation of dam concentration. The
+> county tessellation LISA map shows a more divergent local structure
+> compared to the hexagonal tessellation.
 
 ### Step 6.5
 
@@ -1864,4 +1921,12 @@ Q6 compare to the dam purpose patterns you identified in Q4? (E.g., do
 irrigation dams cluster the same way as all dams?) - Where do policies
 need special attention to local anomalies? (HL/LH outliers)
 
-> answer: 
+> The county LISA map shows 3 majaor HH hotspots in the TVA dams, Colorado River basin dams, and dams in New England. The Colorado River Basin clusters are due to water scarcity and the Colorado River Compact that mandated multi-state coordination. The water supply and infrastructure needs can help explain the cluster of dams built in the region. Irrigation was another factor behind the dams built by the Colorado River Compact. The county LISA map depicts that there are more LL coldspots in desert regions, like in New Mexico and West Texas. Lack of water availability for dams might explain the lack fof dams in this region. The region surrounding the Great Lakes is mostly dominated by LL regions as well. This is likely due to a secure water supply, so there isn't as great of a need for dams. 
+
+> There are a lot of HL and LH tiles surrounding the HH tiles clusters on the LISA county map. The HL regions are likely due to specialized, single-purpose regions where dam systems operate semi-independently rather than as part of broader watershed management.
+
+> The hexagonal LISA map shows sharper clustering patterns and removes clusters that are seen more clearly in the county map. The proportion of quadrants appears to be relatively similar between the two LISA maps, but many HL and LH tiles were lost in the tessellation. This demonstrates how the MAUP operates at a local scale. Depending on the tessellation, the tile size and statistical bias affects how dams are aggregated and how their concentration is subsequently depected on the map. 
+
+> The LISA output informs dam policy by determining where multistate coordination efforts should focus. In HH cluster regions that cross state boundaries, these dams are likely part of the same river system. On the other hand, LL coldspots require very minimal interstate involvement because they typically operate under state or local authority, with no need of multistate coordination. By connecting the LISA analysis to the dam purpose analysis, managers can now target purpose-specific policies to locally-identified clusters. For example, the distribution of dams for flood risk corresponds with the HH hotspot along the Missiouri River Basin.
+
+
