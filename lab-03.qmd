@@ -1,6 +1,9 @@
 ---
 title: "Lab 3: MAUP in Practice — Tessellations and Point-in-Polygon"
 subtitle: "National Dam Inventory (NID): From Counts to Local Clustering"
+author:
+  - name: Kate McCarthy
+    email: katherine.mccarthy@colostate.edu
 format:
   html:
     code-fold: true
@@ -32,21 +35,6 @@ knitr::opts_chunk$set(
 knitr::include_graphics('img/04-dams.jpg')
 ```
 
-# Background
-
-In this lab we will explore the impacts of tessellated surfaces and the
-modifiable areal unit problem (MAUP) using the National Dam Inventory
-maintained by the United States Army Corps of Engineers. The work
-requires writing reusable functions and careful consideration of feature
-aggregation/simplification, spatial joins, and data visualization. The
-end goal is to visualize the distribution of dams and their purposes
-across the country.
-
-**DISCLAIMER**: This lab can be computationally intensive. For some
-steps you may be processing hundreds of millions of relations; run code
-chunk-by-chunk during development rather than knitting the whole
-document repeatedly. Your final knit may take a few minutes. Be proud —
-the report will summarize analyses over very large geometric relations.
 
 ------------------------------------------------------------------------
 
