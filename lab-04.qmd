@@ -365,7 +365,7 @@ For this lab we will use a simple k-means algorithm to group raster cells with s
 Anytime we want to be able to produce a consistent/reproducible result from a random process in R we need to set a seed. Do so using `set.seed`
 
 ```{r}
-
+set.seed(123)
 ```
 
 ### Step 2:
@@ -373,16 +373,24 @@ Anytime we want to be able to produce a consistent/reproducible result from a ra
 -   Extract the values from your 6-band raster stack with `values`
 -   Check the dimensions of the extracted values with `dim`
 
-> What do the dimensions of the extracted values tell you about how the data was extracted?
+-   What do the dimensions of the extracted values tell you about how the data was extracted?
 
 ```{r}
+#extract values from raster stack 
+values = c(landsat_cropped$coastal, landsat_cropped$blue, landsat_cropped$green, landsat_cropped$red, landsat_cropped$nir08, landsat_cropped$swir16) %>% 
+  values()
 
+dim(values)
 ```
+
+> The dimensions of the extracted values is 12192, 6. This tells me that the function extracted the reflectance data from each of the spectral bands (coastal, blue, green, red, NIR, SWIR1). 
 
 -   Remove NA values from your extracted data with `na.omit` for safety
 
 ```{r}
+na.omit(values)
 
+unique(is.na(values)) #no NAs 
 ```
 
 ### Step 3:
@@ -391,25 +399,34 @@ Anytime we want to be able to produce a consistent/reproducible result from a ra
 
 -   Once the `kmeans` algorithm runs, the output will be a list of components. One of these is `cluster` which provides a vector of integers from (1:`k`) indicating the cluster to which each row was allocated.
 
+```{r}
+#cluster 
+kmeans = kmeans(values, 5, iter.max = 100)
+
+```
+
+
 ### Step 4:
 
--   Create a new raster object by copying one of the original bands. For example:
-
-```{r, echo = TRUE, eval = FALSE}
-
-```
-
--   Set the values of the copied raster to the cluster vector from the output kmeans object. For example:
-
-```{r, echo = TRUE, eval = FALSE}
-
-```
+-   Create a new raster object by copying one of the original bands. 
 
 ```{r}
+clus_raster = landsat_cropped$coastal
+values(clus_raster) = NA
+```
 
+-   Set the values of the copied raster to the cluster vector from the output kmeans object. 
+
+```{r}
+idx = which(!apply(is.na(values), 1, any))
+clus_raster[idx] <- kmeans$cluster
+
+plot(clus_raster, col = RColorBrewer::brewer.pal(5, "Paired"))
 ```
 
 Try a few different clusters (k) to see how the map changes.
+
+> I chose 5 clusters because the AOI doesn't have too much variation. Both 12 and 10 clusters made too many clusters for how little the features vary in the remote sensing image. By having too many clusters, the similar variables would ultimately be classed differently in order to meet the cluster value.  
 
 ### Step 5:
 
