@@ -1,6 +1,9 @@
 ---
 title: 'Lab 4: Rasters & Remote Sensing'
 subtitle: 'Palo Iowa Flooding'
+author:
+  - name: Kate McCarthy
+    email: katherine.mccarthy@colostate.edu
 format:
   html:
     toc: true
@@ -424,7 +427,6 @@ kmeans_raster[idx] <- kmeans5$cluster
 
 plot(kmeans_raster, col = RColorBrewer::brewer.pal(5, "Paired"), main = "Palo, Iowa Flood Extent (k = 5)") #best choice 
 
-kmeans5plot
 #clus_raster[idx] <- kmeans12$cluster
 
 #plot(clus_raster, col = RColorBrewer::brewer.pal(12, "Paired"), main = "Palo, Iowa Flood Extent (k = 12)") 
@@ -526,7 +528,6 @@ Check out this drone footage taken during the flooding in Palo, Iowa.
 
 In particular we see a bit of residential flooding at minute 2:17 (screen shot below)
 
-<center>![](../img/palo-flood.png)</center>
 
 Our goal is to see if our flood classifications were able to capture this event.
 
