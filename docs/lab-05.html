@@ -1172,68 +1172,1249 @@ Tip
 <section id="data-prep-eda-30-week-5-1" class="level2">
 <h2 class="anchored" data-anchor-id="data-prep-eda-30-week-5-1">Data prep &amp; EDA (30) — <em>Week 5-1</em></h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Set a seed for reproducibility</label></li>
-<li><label><input type="checkbox">Use <code>skimr::skim()</code> and/or <code>visdat::vis_dat()</code> on your working data. Describe — in 3–4 sentences — what this tells you about missingness, variable types, and distributions. Use this to justify decisions you make in the recipe below.</label></li>
-<li><label><input type="checkbox">Visualize the distribution of <code>q_mean</code> (and your chosen predictors) — note anything skewed, bimodal, or bounded that will drive a <code>step_*</code> choice.</label></li>
-<li><label><input type="checkbox"><em>Optional but encouraged</em>: run <code>ape::Moran.I()</code> on each numeric predictor (Week 5-2 slide <em>“Which predictors carry geography?”</em>) to see which features carry spatial structure. High Moran’s I = candidate geographic proxy to revisit in the VIP step.</label></li>
-<li><label><input type="checkbox">Create an initial split with 75% used for training and 25% for testing. Consider whether stratification (e.g., by <code>aridity</code> quartile or hydrologic class) is appropriate and <strong>explain your choice</strong>.</label></li>
-<li><label><input type="checkbox">Extract your training and testing sets</label></li>
+<li><label><input type="checkbox" checked="">Set a seed for reproducibility</label></li>
+<li><label><input type="checkbox" checked="">Use <code>skimr::skim()</code> and/or <code>visdat::vis_dat()</code> on your working data. Describe — in 3–4 sentences — what this tells you about missingness, variable types, and distributions. Use this to justify decisions you make in the recipe below.</label></li>
+<li><label><input type="checkbox" checked="">Visualize the distribution of <code>q_mean</code> (and your chosen predictors) — note anything skewed, bimodal, or bounded that will drive a <code>step_*</code> choice.</label></li>
+<li><label><input type="checkbox" checked=""><em>Optional but encouraged</em>: run <code>ape::Moran.I()</code> on each numeric predictor (Week 5-2 slide <em>“Which predictors carry geography?”</em>) to see which features carry spatial structure. High Moran’s I = candidate geographic proxy to revisit in the VIP step.</label></li>
+<li><label><input type="checkbox" checked="">Create an initial split with 75% used for training and 25% for testing. Consider whether stratification (e.g., by <code>aridity</code> quartile or hydrologic class) is appropriate and <strong>explain your choice</strong>.</label></li>
+<li><label><input type="checkbox" checked="">Extract your training and testing sets</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="co">#set seed for reproducibility </span></span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>) </span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a><span class="co">#skim </span></span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(camels)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">camels</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">671</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">59</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">53</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">gauge_id</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">671</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">high_prec_timing</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">low_prec_timing</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">geol_1st_class</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">geol_2nd_class</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">0.79</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dom_land_cover</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">p_mean</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.26</td>
+<td style="text-align: right;">1.41</td>
+<td style="text-align: right;">0.64</td>
+<td style="text-align: right;">2.37</td>
+<td style="text-align: right;">3.23</td>
+<td style="text-align: right;">3.78</td>
+<td style="text-align: right;">8.94</td>
+<td style="text-align: left;">▃▇▂▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pet_mean</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.79</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">1.90</td>
+<td style="text-align: right;">2.34</td>
+<td style="text-align: right;">2.69</td>
+<td style="text-align: right;">3.15</td>
+<td style="text-align: right;">4.74</td>
+<td style="text-align: left;">▇▇▅▂▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">p_seasonality</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">-0.04</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">-1.44</td>
+<td style="text-align: right;">-0.26</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.92</td>
+<td style="text-align: left;">▁▂▃▇▂</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">frac_snow</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.91</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">aridity</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.06</td>
+<td style="text-align: right;">0.62</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.70</td>
+<td style="text-align: right;">0.86</td>
+<td style="text-align: right;">1.27</td>
+<td style="text-align: right;">5.21</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">high_prec_freq</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">20.93</td>
+<td style="text-align: right;">4.55</td>
+<td style="text-align: right;">7.90</td>
+<td style="text-align: right;">18.50</td>
+<td style="text-align: right;">22.00</td>
+<td style="text-align: right;">24.23</td>
+<td style="text-align: right;">32.70</td>
+<td style="text-align: left;">▂▃▇▇▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">high_prec_dur</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.35</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">1.08</td>
+<td style="text-align: right;">1.21</td>
+<td style="text-align: right;">1.28</td>
+<td style="text-align: right;">1.44</td>
+<td style="text-align: right;">2.09</td>
+<td style="text-align: left;">▇▅▂▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">low_prec_freq</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">254.65</td>
+<td style="text-align: right;">35.12</td>
+<td style="text-align: right;">169.90</td>
+<td style="text-align: right;">232.70</td>
+<td style="text-align: right;">255.85</td>
+<td style="text-align: right;">278.92</td>
+<td style="text-align: right;">348.70</td>
+<td style="text-align: left;">▂▅▇▅▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">low_prec_dur</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">5.95</td>
+<td style="text-align: right;">3.20</td>
+<td style="text-align: right;">2.79</td>
+<td style="text-align: right;">4.24</td>
+<td style="text-align: right;">4.95</td>
+<td style="text-align: right;">6.70</td>
+<td style="text-align: right;">36.51</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">glim_1st_class_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.79</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.61</td>
+<td style="text-align: right;">0.83</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">▁▃▃▃▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">glim_2nd_class_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: left;">▇▃▃▂▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">carbonate_rocks_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">geol_porostiy</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: left;">▇▆▇▇▂</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">geol_permeability</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">-13.89</td>
+<td style="text-align: right;">1.18</td>
+<td style="text-align: right;">-16.50</td>
+<td style="text-align: right;">-14.77</td>
+<td style="text-align: right;">-13.96</td>
+<td style="text-align: right;">-13.00</td>
+<td style="text-align: right;">-10.90</td>
+<td style="text-align: left;">▂▅▇▅▂</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">soil_depth_pelletier</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">10.87</td>
+<td style="text-align: right;">16.24</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.23</td>
+<td style="text-align: right;">12.89</td>
+<td style="text-align: right;">50.00</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">soil_depth_statsgo</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.29</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">1.11</td>
+<td style="text-align: right;">1.46</td>
+<td style="text-align: right;">1.50</td>
+<td style="text-align: right;">1.50</td>
+<td style="text-align: left;">▁▁▂▂▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">soil_porosity</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: left;">▃▇▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">soil_conductivity</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.74</td>
+<td style="text-align: right;">1.52</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">0.93</td>
+<td style="text-align: right;">1.35</td>
+<td style="text-align: right;">1.93</td>
+<td style="text-align: right;">13.96</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">max_water_content</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.64</td>
+<td style="text-align: right;">1.05</td>
+<td style="text-align: left;">▁▅▇▃▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sand_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">36.47</td>
+<td style="text-align: right;">15.63</td>
+<td style="text-align: right;">8.18</td>
+<td style="text-align: right;">25.44</td>
+<td style="text-align: right;">35.27</td>
+<td style="text-align: right;">44.46</td>
+<td style="text-align: right;">91.98</td>
+<td style="text-align: left;">▅▇▅▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">silt_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">33.86</td>
+<td style="text-align: right;">13.25</td>
+<td style="text-align: right;">2.99</td>
+<td style="text-align: right;">23.95</td>
+<td style="text-align: right;">34.06</td>
+<td style="text-align: right;">43.64</td>
+<td style="text-align: right;">67.77</td>
+<td style="text-align: left;">▂▆▇▆▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">clay_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">19.89</td>
+<td style="text-align: right;">9.32</td>
+<td style="text-align: right;">1.85</td>
+<td style="text-align: right;">14.00</td>
+<td style="text-align: right;">18.66</td>
+<td style="text-align: right;">25.42</td>
+<td style="text-align: right;">50.35</td>
+<td style="text-align: left;">▃▇▅▂▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">water_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">19.35</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">organic_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.59</td>
+<td style="text-align: right;">3.84</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">57.86</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">other_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">9.82</td>
+<td style="text-align: right;">16.83</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.31</td>
+<td style="text-align: right;">11.74</td>
+<td style="text-align: right;">99.38</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gauge_lat</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">39.24</td>
+<td style="text-align: right;">5.21</td>
+<td style="text-align: right;">27.05</td>
+<td style="text-align: right;">35.70</td>
+<td style="text-align: right;">39.25</td>
+<td style="text-align: right;">43.21</td>
+<td style="text-align: right;">48.82</td>
+<td style="text-align: left;">▂▃▇▆▅</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gauge_lon</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">-95.79</td>
+<td style="text-align: right;">16.21</td>
+<td style="text-align: right;">-124.39</td>
+<td style="text-align: right;">-110.41</td>
+<td style="text-align: right;">-92.78</td>
+<td style="text-align: right;">-81.77</td>
+<td style="text-align: right;">-67.94</td>
+<td style="text-align: left;">▆▃▇▇▅</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">elev_mean</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">759.42</td>
+<td style="text-align: right;">786.00</td>
+<td style="text-align: right;">10.21</td>
+<td style="text-align: right;">249.67</td>
+<td style="text-align: right;">462.72</td>
+<td style="text-align: right;">928.88</td>
+<td style="text-align: right;">3571.18</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">slope_mean</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">46.20</td>
+<td style="text-align: right;">47.12</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">7.43</td>
+<td style="text-align: right;">28.80</td>
+<td style="text-align: right;">73.17</td>
+<td style="text-align: right;">255.69</td>
+<td style="text-align: left;">▇▂▂▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">area_gages2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">792.62</td>
+<td style="text-align: right;">1701.95</td>
+<td style="text-align: right;">4.03</td>
+<td style="text-align: right;">122.28</td>
+<td style="text-align: right;">329.68</td>
+<td style="text-align: right;">794.30</td>
+<td style="text-align: right;">25791.04</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">area_geospa_fabric</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">808.08</td>
+<td style="text-align: right;">1709.85</td>
+<td style="text-align: right;">4.10</td>
+<td style="text-align: right;">127.98</td>
+<td style="text-align: right;">340.70</td>
+<td style="text-align: right;">804.50</td>
+<td style="text-align: right;">25817.78</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">frac_forest</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.64</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">0.81</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">▃▁▁▂▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lai_max</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.22</td>
+<td style="text-align: right;">1.52</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">1.81</td>
+<td style="text-align: right;">3.37</td>
+<td style="text-align: right;">4.70</td>
+<td style="text-align: right;">5.58</td>
+<td style="text-align: left;">▅▆▃▅▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lai_diff</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.45</td>
+<td style="text-align: right;">1.33</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">1.20</td>
+<td style="text-align: right;">2.34</td>
+<td style="text-align: right;">3.76</td>
+<td style="text-align: right;">4.83</td>
+<td style="text-align: left;">▇▇▇▆▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gvf_max</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.72</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">0.61</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">0.86</td>
+<td style="text-align: right;">0.92</td>
+<td style="text-align: left;">▁▁▂▃▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gvf_diff</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: left;">▃▇▅▇▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">dom_land_cover_frac</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.81</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">0.86</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">▁▂▃▃▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">root_depth_50</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">0.96</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: left;">▃▃▇▂▂</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">root_depth_99</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">0.96</td>
+<td style="text-align: right;">1.83</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">1.50</td>
+<td style="text-align: right;">1.52</td>
+<td style="text-align: right;">1.80</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">3.10</td>
+<td style="text-align: left;">▇▃▂▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">q_mean</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.49</td>
+<td style="text-align: right;">1.54</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">1.13</td>
+<td style="text-align: right;">1.75</td>
+<td style="text-align: right;">9.69</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">runoff_ratio</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.39</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.24</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.51</td>
+<td style="text-align: right;">1.36</td>
+<td style="text-align: left;">▆▇▂▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">slope_fdc</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.24</td>
+<td style="text-align: right;">0.51</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">1.28</td>
+<td style="text-align: right;">1.63</td>
+<td style="text-align: right;">2.50</td>
+<td style="text-align: left;">▂▅▇▇▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">baseflow_index</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">0.98</td>
+<td style="text-align: left;">▁▃▇▅▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">stream_elas</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.83</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">-0.64</td>
+<td style="text-align: right;">1.32</td>
+<td style="text-align: right;">1.70</td>
+<td style="text-align: right;">2.23</td>
+<td style="text-align: right;">6.24</td>
+<td style="text-align: left;">▁▇▃▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">q5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">2.42</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">q95</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">5.06</td>
+<td style="text-align: right;">4.94</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.07</td>
+<td style="text-align: right;">3.77</td>
+<td style="text-align: right;">6.29</td>
+<td style="text-align: right;">31.82</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">high_q_freq</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">25.74</td>
+<td style="text-align: right;">29.07</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6.41</td>
+<td style="text-align: right;">15.10</td>
+<td style="text-align: right;">35.79</td>
+<td style="text-align: right;">172.80</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">high_q_dur</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">6.91</td>
+<td style="text-align: right;">10.07</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.82</td>
+<td style="text-align: right;">2.85</td>
+<td style="text-align: right;">7.55</td>
+<td style="text-align: right;">92.56</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">low_q_freq</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">107.62</td>
+<td style="text-align: right;">82.24</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">37.44</td>
+<td style="text-align: right;">96.00</td>
+<td style="text-align: right;">162.14</td>
+<td style="text-align: right;">356.80</td>
+<td style="text-align: left;">▇▆▅▂▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">low_q_dur</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">22.28</td>
+<td style="text-align: right;">21.66</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">10.00</td>
+<td style="text-align: right;">15.52</td>
+<td style="text-align: right;">26.91</td>
+<td style="text-align: right;">209.88</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">zero_q_freq</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hfd_mean</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">182.52</td>
+<td style="text-align: right;">33.53</td>
+<td style="text-align: right;">112.25</td>
+<td style="text-align: right;">160.16</td>
+<td style="text-align: right;">173.77</td>
+<td style="text-align: right;">204.05</td>
+<td style="text-align: right;">287.75</td>
+<td style="text-align: left;">▂▇▃▂▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">logQmean</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">-0.11</td>
+<td style="text-align: right;">1.17</td>
+<td style="text-align: right;">-5.39</td>
+<td style="text-align: right;">-0.46</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">2.27</td>
+<td style="text-align: left;">▁▁▂▇▂</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visdat)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a><span class="co">#visualize distribution of q_mean and chosen predictors </span></span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>q_mean_dist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(camels, <span class="fu">aes</span>(<span class="at">x =</span> q_mean)) <span class="sc">+</span></span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">25</span>)</span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>q_mean_dist</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>camels_vis <span class="ot">&lt;-</span> camels <span class="sc">%&gt;%</span> </span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(p_mean, pet_mean, frac_snow, aridity, elev_mean, slope_mean, frac_forest, soil_porosity, soil_conductivity, max_water_content, sand_frac, silt_frac, clay_frac) <span class="sc">%&gt;%</span> </span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> value)) <span class="sc">+</span></span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">25</span>) <span class="sc">+</span></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free"</span>) </span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>camels_vis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-43-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="co">#check spatial autocorrelation using moran's I </span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>model_camels <span class="ot">&lt;-</span> camels <span class="sc">%&gt;%</span> </span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(gauge_lon, gauge_lat,p_mean, pet_mean, frac_snow, aridity, elev_mean, slope_mean, frac_forest, soil_porosity, soil_conductivity, max_water_content, sand_frac, silt_frac, clay_frac) <span class="sc">%&gt;%</span> </span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>() </span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(model_camels <span class="sc">%&gt;%</span> <span class="fu">select</span>(gauge_lon, gauge_lat)))</span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>dists_inv <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>dists</span>
+<span id="cb79-9"><a href="#cb79-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-10"><a href="#cb79-10" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(dists_inv) <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb79-11"><a href="#cb79-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-12"><a href="#cb79-12" aria-hidden="true" tabindex="-1"></a>model_camels <span class="sc">%&gt;%</span> </span>
+<span id="cb79-13"><a href="#cb79-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>gauge_lon, <span class="sc">-</span>gauge_lat) <span class="sc">%&gt;%</span> <span class="co">#drop lat and long because they will obvs have high spatial autocorrelation</span></span>
+<span id="cb79-14"><a href="#cb79-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(<span class="sc">~</span>ape<span class="sc">::</span><span class="fu">Moran.I</span>(., dists_inv)<span class="sc">$</span>observed) <span class="sc">%&gt;%</span></span>
+<span id="cb79-15"><a href="#cb79-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb79-16"><a href="#cb79-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"morans_i"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb79-17"><a href="#cb79-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(morans_i))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 13 × 2
+   variable          morans_i
+   &lt;chr&gt;                &lt;dbl&gt;
+ 1 slope_mean           0.440
+ 2 p_mean               0.434
+ 3 elev_mean            0.422
+ 4 frac_snow            0.357
+ 5 aridity              0.353
+ 6 pet_mean             0.302
+ 7 frac_forest          0.280
+ 8 max_water_content    0.232
+ 9 clay_frac            0.216
+10 silt_frac            0.213
+11 soil_conductivity    0.185
+12 sand_frac            0.169
+13 soil_porosity        0.128</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create 75/25 training/testing split </span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>(resample_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(camels, <span class="at">prop =</span> <span class="fl">0.75</span>, <span class="at">strata =</span> logQmean))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;Training/Testing/Total&gt;
+&lt;503/168/671&gt;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co">#sanity check --&gt; make sure 75/25 split actually occured </span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="dv">168</span><span class="sc">/</span><span class="dv">671</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2503726</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract training and testing sets </span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>model_camels_train <span class="ot">&lt;-</span> <span class="fu">training</span>(resample_split)</span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>model_camels_test <span class="ot">&lt;-</span> <span class="fu">testing</span>(resample_split)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>answer: The data contains 53 numeric variables and 6 character variables. Some of the numeric data has missing values, particularly root_depth_50 and root_depth_99, which both have 24 missing values. However, because of the size of the dataset, these can be interpolated from the mean to fill in the N/As for these variables. Many of the numeric variables, particularly the ones related to discharge (Q) have right-skewed distributions, which can likely be log-transformed to increase linearity. When looking at the distribution of q_mean, the histogram demonstrates this right-skewed quality, so the output variable should be the log of q_mean. Aridity, mean elevation, fraction snow, mean precipitation, mean slope, and soil conductivity are all right-skewed, so they will need to be log-transformed. Stratification by logQmean was chosen so that the output variable is accurately represented.</p>
+</blockquote>
 </section>
 <section id="recipe-30-week-5-1" class="level2">
 <h2 class="anchored" data-anchor-id="recipe-30-week-5-1">Recipe (30) — <em>Week 5-1</em></h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Define a formula you want to use to predict <code>logQmean</code></label></li>
-<li><label><input type="checkbox">In 5–7 sentences, justify your predictor choice. Consult the downloaded PDF; ground <strong>each</strong> recipe step (log, normalize, interact, naomit, impute, …) in what the EDA above showed.</label></li>
-<li><label><input type="checkbox">Build a recipe that handles those predictors. Your recipe should contain <strong>at least three</strong> <code>step_*</code> calls beyond the formula, and each should be there for a reason you can name.</label></li>
+<li><label><input type="checkbox" checked="">Define a formula you want to use to predict <code>logQmean</code></label></li>
+<li><label><input type="checkbox" checked="">In 5–7 sentences, justify your predictor choice. Consult the downloaded PDF; ground <strong>each</strong> recipe step (log, normalize, interact, naomit, impute, …) in what the EDA above showed.</label></li>
+<li><label><input type="checkbox" checked="">Build a recipe that handles those predictors. Your recipe should contain <strong>at least three</strong> <code>step_*</code> calls beyond the formula, and each should be there for a reason you can name.</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>recipe_obj <span class="ot">&lt;-</span> <span class="fu">recipe</span>(logQmean <span class="sc">~</span> ., <span class="at">data =</span> camels_train) <span class="sc">%&gt;%</span></span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(q_mean, runoff_ratio, slope_fdc, baseflow_index, stream_elas,q5, q95, high_q_freq, high_q_dur, low_q_freq, low_q_dur, zero_q_freq, hfd_mean, gauge_lat, gauge_lon, gauge_id, high_prec_timing, low_prec_timing, root_depth_50, root_depth_99, geol_porostiy, geol_1st_class, geol_2nd_class, dom_land_cover) <span class="sc">%&gt;%</span> </span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mean</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_log</span>(aridity, elev_mean, p_mean, slope_mean, soil_conductivity) <span class="sc">%&gt;%</span> </span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_predictors</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_naomit</span>(<span class="fu">all_predictors</span>(), <span class="fu">all_outcomes</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>answer: I chose to predict on aridiy, mean elevation, snow fraction, mean precipitation, mean slope, and soil conductivity. These were chosen because they all impact discharge, but don’t have as much spatial correlation as featuers like longitude and latitude. I also chose to leave out any predictors directly related to discharge, such as mean discharge and runoff ratio. I attempted to minimize the number parameters while balancing the efficacy of the model. The exploratory data analysis revealed that aridity, mean elevation, snow fraction, mean precipitation, mean slope, and soil conductivity are skewed right, so a step_log function was used to redistribute the data. All predictors were transformed to a common scale using step_normalize, which ensures that all predictors contribute to the model equally, without magnitude impacting it. Laslty, na_omit was used to remove and N/As from predictors and outcomes.</p>
+</blockquote>
 </section>
 <section id="define-3-models-30-week-6-1" class="level2">
 <h2 class="anchored" data-anchor-id="define-3-models-30-week-6-1">Define 3 models (30) — <em>Week 6-1</em></h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Define a random forest model using the <code>rand_forest</code> function (engine <code>ranger</code>, mode <code>regression</code>)</label></li>
-<li><label><input type="checkbox">Define two other models of your choice. The Week 6-1 zoo (<code>linear_reg</code>, <code>boost_tree</code>, <code>svm_rbf</code>, <code>svm_poly</code>, <code>mlp</code>, <code>bag_mlp</code>, <code>decision_tree</code>) is a good menu — the comparison table in that deck summarizes strengths and weaknesses.</label></li>
-<li><label><input type="checkbox">For each model, briefly note (one sentence) why it’s a reasonable candidate for this regression problem — what kind of structure does it capture?</label></li>
+<li><label><input type="checkbox" checked="">Define a random forest model using the <code>rand_forest</code> function (engine <code>ranger</code>, mode <code>regression</code>)</label></li>
+<li><label><input type="checkbox" checked="">Define two other models of your choice. The Week 6-1 zoo (<code>linear_reg</code>, <code>boost_tree</code>, <code>svm_rbf</code>, <code>svm_poly</code>, <code>mlp</code>, <code>bag_mlp</code>, <code>decision_tree</code>) is a good menu — the comparison table in that deck summarizes strengths and weaknesses.</label></li>
+<li><label><input type="checkbox" checked="">For each model, briefly note (one sentence) why it’s a reasonable candidate for this regression problem — what kind of structure does it capture?</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="co">#random forest</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>rf_model_mine <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a><span class="co">#xgboost</span></span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>xgb_model_mine <span class="ot">&lt;-</span> <span class="fu">boost_tree</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"xgboost"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-11"><a href="#cb87-11" aria-hidden="true" tabindex="-1"></a><span class="co">#decision tree </span></span>
+<span id="cb87-12"><a href="#cb87-12" aria-hidden="true" tabindex="-1"></a>dt_model_mine <span class="ot">&lt;-</span> <span class="fu">decision_tree</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb87-13"><a href="#cb87-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"rpart"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb87-14"><a href="#cb87-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>answer: Random forest models construct multiple decision trees and aggregates predictions to improve accuracy and reduce overfitting. A boosted tree model use powerful machine learning method to improve predictive accuracy and reduce bias. Decision models have a flowchart-like structure and can capture non-linear relationships.</p>
+</blockquote>
 </section>
 <section id="workflow-set-compare-with-honest-cv-35-week-5-2" class="level2">
 <h2 class="anchored" data-anchor-id="workflow-set-compare-with-honest-cv-35-week-5-2">Workflow set — compare with <em>honest</em> CV (35) — <em>Week 5-2</em></h2>
 <p>With your preprocessing steps and models defined, build a <code>workflow_set</code> and compare the models across resamples. Because CAMELS basins are spatially distributed, a random <code>vfold_cv</code> can over-state performance if your model leans on geographic proximity — the Week 5-2 deck walks through this carefully, including when the gap is real and when it isn’t.</p>
 <ul class="task-list">
-<li><label><input type="checkbox">Build a 10-fold <code>vfold_cv</code> <strong>and</strong> a <code>spatialsample::spatial_block_cv()</code> (or <code>spatial_clustering_cv()</code>) on the training data. You will need to <code>st_as_sf()</code> the training data using <code>gauge_lon</code>/<code>gauge_lat</code> (Week 5-2, <em>Applying this to your data</em>).</label></li>
-<li><label><input type="checkbox">Fit your workflow set over <strong>both</strong> resampling schemes with <code>workflow_map("fit_resamples", ...)</code></label></li>
-<li><label><input type="checkbox">Use <code>autoplot()</code> and <code>rank_results()</code> to compare the models under each scheme</label></li>
-<li><label><input type="checkbox">Describe the gap (5–7 sentences): which model wins, how much does performance drop when you move from random to spatial CV, and which number do you trust as your generalization estimate? What does the spread of per-fold metrics tell you about <em>where</em> your model struggles? Recall from lecture that a <strong>small</strong> gap is a signal that your predictors carry real transferable signal — not a failed diagnostic.</label></li>
+<li><label><input type="checkbox" checked="">Build a 10-fold <code>vfold_cv</code> <strong>and</strong> a <code>spatialsample::spatial_block_cv()</code> (or <code>spatial_clustering_cv()</code>) on the training data. You will need to <code>st_as_sf()</code> the training data using <code>gauge_lon</code>/<code>gauge_lat</code> (Week 5-2, <em>Applying this to your data</em>).</label></li>
+<li><label><input type="checkbox" checked="">Fit your workflow set over <strong>both</strong> resampling schemes with <code>workflow_map("fit_resamples", ...)</code></label></li>
+<li><label><input type="checkbox" checked="">Use <code>autoplot()</code> and <code>rank_results()</code> to compare the models under each scheme</label></li>
+<li><label><input type="checkbox" checked="">Describe the gap (5–7 sentences): which model wins, how much does performance drop when you move from random to spatial CV, and which number do you trust as your generalization estimate? What does the spread of per-fold metrics tell you about <em>where</em> your model struggles? Recall from lecture that a <strong>small</strong> gap is a signal that your predictors carry real transferable signal — not a failed diagnostic.</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spatialsample)</span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>camels_folds <span class="ot">&lt;-</span> <span class="fu">vfold_cv</span>(camels_train, <span class="at">v =</span> <span class="dv">10</span>)</span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>camels_sf <span class="ot">&lt;-</span> camels_train <span class="sc">%&gt;%</span></span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"gauge_lon"</span>, <span class="st">"gauge_lat"</span>),</span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">crs =</span> <span class="dv">4326</span>, <span class="at">remove =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a>camels_block <span class="ot">&lt;-</span> <span class="fu">spatial_block_cv</span>(camels_sf, <span class="at">v =</span> <span class="dv">10</span>)</span>
+<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-11"><a href="#cb90-11" aria-hidden="true" tabindex="-1"></a>wf_set <span class="ot">&lt;-</span> <span class="fu">workflow_set</span>(<span class="at">preproc =</span> <span class="fu">list</span>(recipe_obj),</span>
+<span id="cb90-12"><a href="#cb90-12" aria-hidden="true" tabindex="-1"></a>                       <span class="at">models =</span> <span class="fu">list</span>(rf_model_mine, </span>
+<span id="cb90-13"><a href="#cb90-13" aria-hidden="true" tabindex="-1"></a>                                     xgb_model_mine, </span>
+<span id="cb90-14"><a href="#cb90-14" aria-hidden="true" tabindex="-1"></a>                                     dt_model_mine))</span>
+<span id="cb90-15"><a href="#cb90-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-16"><a href="#cb90-16" aria-hidden="true" tabindex="-1"></a>wf_random <span class="ot">&lt;-</span> wf_set <span class="sc">%&gt;%</span> </span>
+<span id="cb90-17"><a href="#cb90-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">workflow_map</span>(<span class="st">"fit_resamples"</span>, <span class="at">resamples =</span> camels_folds)</span>
+<span id="cb90-18"><a href="#cb90-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-19"><a href="#cb90-19" aria-hidden="true" tabindex="-1"></a>wf_spatial <span class="ot">&lt;-</span> wf_set <span class="sc">%&gt;%</span> </span>
+<span id="cb90-20"><a href="#cb90-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">workflow_map</span>(<span class="st">"fit_resamples"</span>, <span class="at">resamples =</span> camels_block)</span>
+<span id="cb90-21"><a href="#cb90-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-22"><a href="#cb90-22" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(wf_random)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(wf_spatial)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-46-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rank_results</span>(wf_random, <span class="at">rank_metric =</span> <span class="st">"rmse"</span>, <span class="at">select_best =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 9
+  wflow_id          .config .metric  mean std_err     n preprocessor model  rank
+  &lt;chr&gt;             &lt;chr&gt;   &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;        &lt;chr&gt; &lt;int&gt;
+1 recipe_rand_fore… pre0_m… rmse    0.355  0.0271    10 recipe       rand…     1
+2 recipe_rand_fore… pre0_m… rsq     0.914  0.0116    10 recipe       rand…     1
+3 recipe_boost_tree pre0_m… rmse    0.371  0.0320    10 recipe       boos…     2
+4 recipe_boost_tree pre0_m… rsq     0.897  0.0173    10 recipe       boos…     2
+5 recipe_decision_… pre0_m… rmse    0.511  0.0366    10 recipe       deci…     3
+6 recipe_decision_… pre0_m… rsq     0.809  0.0277    10 recipe       deci…     3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rank_results</span>(wf_spatial, <span class="at">rank_metric =</span> <span class="st">"rmse"</span>, <span class="at">select_best =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 9
+  wflow_id          .config .metric  mean std_err     n preprocessor model  rank
+  &lt;chr&gt;             &lt;chr&gt;   &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;        &lt;chr&gt; &lt;int&gt;
+1 recipe_rand_fore… pre0_m… rmse    0.414  0.0365    10 recipe       rand…     1
+2 recipe_rand_fore… pre0_m… rsq     0.862  0.0265    10 recipe       rand…     1
+3 recipe_boost_tree pre0_m… rmse    0.442  0.0457    10 recipe       boos…     2
+4 recipe_boost_tree pre0_m… rsq     0.819  0.0355    10 recipe       boos…     2
+5 recipe_decision_… pre0_m… rmse    0.599  0.0477    10 recipe       deci…     3
+6 recipe_decision_… pre0_m… rsq     0.710  0.0393    10 recipe       deci…     3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(wf_random) <span class="sc">/</span> <span class="fu">autoplot</span>(wf_spatial)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-46-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>answer: With the rank metric being root mean squared error, the random forest model ranked first in the random CV and the boosted tree model came in first for the spatial CV. However, the random forest model ranks first when comparing R^2 values in both the random and spatial CV. When going from a random to a spatial CV, performance dropped about 0.07 rmse when comparing across models. This is a relatiely small gap, which indicates some spatial correlation. Because this gap between cross validations is so small, it signals that the predictors carry real transferable signal.</p>
+</blockquote>
 </section>
 <section id="tune-the-best-model-25-week-6-1" class="level2">
 <h2 class="anchored" data-anchor-id="tune-the-best-model-25-week-6-1">Tune the best model (25) — <em>Week 6-1</em></h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Tag <strong>at least two</strong> hyperparameters with <code>tune()</code> in your chosen model specification</label></li>
-<li><label><input type="checkbox">Build a named grid (e.g.&nbsp;<code>grid_space_filling()</code>, <code>grid_regular()</code>) — do not just pass an integer to <code>tune_grid()</code>. Justify your grid choice in one sentence.</label></li>
-<li><label><input type="checkbox">Run <code>tune_grid()</code> against your <strong>spatial</strong> resamples with <code>control_grid(save_pred = TRUE)</code></label></li>
-<li><label><input type="checkbox">Show the tuning landscape with <code>autoplot()</code> and identify the best combination with <code>show_best()</code> / <code>select_best()</code></label></li>
-<li><label><input type="checkbox">In 2–3 sentences, describe which hyperparameters mattered most and what you learned about the model’s sensitivity</label></li>
+<li><label><input type="checkbox" checked="">Tag <strong>at least two</strong> hyperparameters with <code>tune()</code> in your chosen model specification</label></li>
+<li><label><input type="checkbox" checked="">Build a named grid (e.g.&nbsp;<code>grid_space_filling()</code>, <code>grid_regular()</code>) — do not just pass an integer to <code>tune_grid()</code>. Justify your grid choice in one sentence.</label></li>
+<li><label><input type="checkbox" checked="">Run <code>tune_grid()</code> against your <strong>spatial</strong> resamples with <code>control_grid(save_pred = TRUE)</code></label></li>
+<li><label><input type="checkbox" checked="">Show the tuning landscape with <code>autoplot()</code> and identify the best combination with <code>show_best()</code> / <code>select_best()</code></label></li>
+<li><label><input type="checkbox" checked="">In 2–3 sentences, describe which hyperparameters mattered most and what you learned about the model’s sensitivity</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="co">#chose random forest model because it ranked higher on most metrics (rmse for spatial and rsq overall)</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>rf_tuned <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(</span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n =</span> <span class="fu">tune</span>(),</span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees =</span> <span class="dv">1000</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a><span class="co">#build workflow</span></span>
+<span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a>rf_tuned_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb97-11"><a href="#cb97-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(recipe_obj) <span class="sc">%&gt;%</span></span>
+<span id="cb97-12"><a href="#cb97-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_tuned)</span>
+<span id="cb97-13"><a href="#cb97-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-14"><a href="#cb97-14" aria-hidden="true" tabindex="-1"></a><span class="co">#build grid</span></span>
+<span id="cb97-15"><a href="#cb97-15" aria-hidden="true" tabindex="-1"></a>rf_tuned_grid <span class="ot">&lt;-</span> <span class="fu">grid_space_filling</span>(</span>
+<span id="cb97-16"><a href="#cb97-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">11</span>)),</span>
+<span id="cb97-17"><a href="#cb97-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">min_n</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">20</span>)),</span>
+<span id="cb97-18"><a href="#cb97-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">20</span>)</span>
+<span id="cb97-19"><a href="#cb97-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-20"><a href="#cb97-20" aria-hidden="true" tabindex="-1"></a><span class="co">#tune against spatial CV</span></span>
+<span id="cb97-21"><a href="#cb97-21" aria-hidden="true" tabindex="-1"></a>rf_tuned_spatial <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(rf_tuned,</span>
+<span id="cb97-22"><a href="#cb97-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">preprocessor =</span> recipe_obj,</span>
+<span id="cb97-23"><a href="#cb97-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> camels_block,</span>
+<span id="cb97-24"><a href="#cb97-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> rf_tuned_grid,</span>
+<span id="cb97-25"><a href="#cb97-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">control_grid</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb97-26"><a href="#cb97-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-27"><a href="#cb97-27" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(rf_tuned_spatial)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(rf_tuned_spatial, <span class="at">metric =</span> <span class="st">"rsq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 8
+   mtry min_n .metric .estimator  mean     n std_err .config         
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;           
+1    11     5 rsq     standard   0.876    10  0.0227 pre0_mod19_post0
+2     9     2 rsq     standard   0.874    10  0.0235 pre0_mod15_post0
+3    11    15 rsq     standard   0.874    10  0.0239 pre0_mod20_post0
+4    10    10 rsq     standard   0.874    10  0.0237 pre0_mod17_post0
+5     9    13 rsq     standard   0.872    10  0.0243 pre0_mod16_post0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_best</span>(rf_tuned_spatial, <span class="at">metric =</span> <span class="st">"rsq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+   mtry min_n .config         
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt;           
+1    11     5 pre0_mod19_post0</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>answer: The best hyperparameter combination was mtry = 11 and min_n = 5, which resulted in a rsq of .876. It looks like the model is sensitive to the mtry parameter compared to min_n.&nbsp;</p>
+</blockquote>
 </section>
 <section id="variable-importance-25-week-5-2" class="level2">
 <h2 class="anchored" data-anchor-id="variable-importance-25-week-5-2">Variable importance (25) — <em>Week 5-2</em></h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Produce a <code>vip::vip()</code> plot for your tuned model (pattern: <code>extract_fit_parsnip() |&gt; vip()</code>)</label></li>
+<li><label><input type="checkbox" checked="">Produce a <code>vip::vip()</code> plot for your tuned model (pattern: <code>extract_fit_parsnip() |&gt; vip()</code>)</label></li>
 <li><label><input type="checkbox">Interpret the top predictors (4–6 sentences). Cross-reference against the predictor Moran’s I you computed in EDA — are any of the top VIP features <em>also</em> highly spatially autocorrelated? If so, they could be acting as <strong>geographic proxies</strong> — discuss whether the importance reflects <em>mechanism</em> or <em>location</em> (Week 5-2, Part 4).</label></li>
-<li><label><input type="checkbox">If the model you chose cannot provide VIP, instead discuss the interpretability trade-off you accepted and how you would diagnose the same question (permutation importance via <code>vip::vi_permute()</code>, partial dependence, etc.).</label></li>
+<li><label><input type="checkbox" checked="">If the model you chose cannot provide VIP, instead discuss the interpretability trade-off you accepted and how you would diagnose the same question (permutation importance via <code>vip::vi_permute()</code>, partial dependence, etc.).</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="co">#select best parameters </span></span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a>best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(rf_tuned_spatial, <span class="at">metric =</span> <span class="st">"rsq"</span>)</span>
+<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a><span class="co">#use best parameters to finalize wf </span></span>
+<span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a>final_wf <span class="ot">&lt;-</span> <span class="fu">finalize_workflow</span>(rf_tuned_wf, best_params)</span>
+<span id="cb102-6"><a href="#cb102-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-7"><a href="#cb102-7" aria-hidden="true" tabindex="-1"></a><span class="co">#fit on training data</span></span>
+<span id="cb102-8"><a href="#cb102-8" aria-hidden="true" tabindex="-1"></a>final_fit <span class="ot">&lt;-</span> <span class="fu">fit</span>(final_wf, <span class="at">data =</span> camels_train)</span>
+<span id="cb102-9"><a href="#cb102-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-10"><a href="#cb102-10" aria-hidden="true" tabindex="-1"></a><span class="co">#vip plot</span></span>
+<span id="cb102-11"><a href="#cb102-11" aria-hidden="true" tabindex="-1"></a>final_fit <span class="sc">%&gt;%</span></span>
+<span id="cb102-12"><a href="#cb102-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_parsnip</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb102-13"><a href="#cb102-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vip</span>(<span class="at">num_features =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb102-14"><a href="#cb102-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"VIP Plot"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>answer: The top predictors in terms of importance were mean precipitation, aridity, low precipitation freqency. This makes sense because precipitation and aridity affect the amount of water in a stream. However, these predictors are spatially correlated in the US, with wetter regions in the east and drier regions in the west. Soil predictors rank relatively low (soil depth, percent clay), with percent sand and percent silt not even making the top 20 in terms of variable importance.</p>
+</blockquote>
 </section>
 <section id="final-fit-evaluate-25-week-6-1" class="level2">
 <h2 class="anchored" data-anchor-id="final-fit-evaluate-25-week-6-1">Final fit &amp; evaluate (25) — <em>Week 6-1</em></h2>
 <p>Use the canonical tidymodels closing move (Week 6-1, <em>The final fit!</em>):</p>
 <ul class="task-list">
 <li><label><input type="checkbox"><code>finalize_workflow()</code> your tuned workflow with the best hyperparameters</label></li>
-<li><label><input type="checkbox">Run <code>last_fit()</code> against your original <code>initial_split()</code> object — this trains on the full training set and evaluates on the held-out test set in one call</label></li>
-<li><label><input type="checkbox">Use <code>collect_metrics()</code> and <code>collect_predictions()</code> to report final test-set performance</label></li>
-<li><label><input type="checkbox">Create a plot of observed vs predicted <code>logQmean</code> on the <strong>test set</strong> with clear title, axis labels, and a compelling color scale (e.g., colored by aridity or region). Include a 1:1 reference line.</label></li>
-<li><label><input type="checkbox">In 3–5 sentences, describe what you think of the results — including how the test-set metrics compare to your spatial-CV estimate, where the model under- or over-predicts, and what you’d investigate next.</label></li>
+<li><label><input type="checkbox" checked="">Run <code>last_fit()</code> against your original <code>initial_split()</code> object — this trains on the full training set and evaluates on the held-out test set in one call</label></li>
+<li><label><input type="checkbox" checked="">Use <code>collect_metrics()</code> and <code>collect_predictions()</code> to report final test-set performance</label></li>
+<li><label><input type="checkbox" checked="">Create a plot of observed vs predicted <code>logQmean</code> on the <strong>test set</strong> with clear title, axis labels, and a compelling color scale (e.g., colored by aridity or region). Include a 1:1 reference line.</label></li>
+<li><label><input type="checkbox" checked="">In 3–5 sentences, describe what you think of the results — including how the test-set metrics compare to your spatial-CV estimate, where the model under- or over-predicts, and what you’d investigate next.</label></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>final_wf <span class="ot">&lt;-</span> <span class="fu">finalize_workflow</span>(rf_tuned_wf, best_params)</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>final_last_fit <span class="ot">&lt;-</span> <span class="fu">last_fit</span>(final_wf, camels_split)</span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(final_last_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  .metric .estimator .estimate .config        
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          
+1 rmse    standard       0.364 pre0_mod0_post0
+2 rsq     standard       0.902 pre0_mod0_post0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="co">#make plot </span></span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_predictions</span>(final_last_fit) <span class="sc">%&gt;%</span></span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="fu">testing</span>(camels_split) <span class="sc">%&gt;%</span></span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">select</span>(p_mean)) <span class="sc">%&gt;%</span></span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> logQmean, <span class="at">y =</span> .pred, <span class="at">color =</span> p_mean)) <span class="sc">+</span></span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb105-8"><a href="#cb105-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb105-9"><a href="#cb105-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> <span class="st">"red3"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb105-10"><a href="#cb105-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>() <span class="sc">+</span></span>
+<span id="cb105-11"><a href="#cb105-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Log Mean Streamflow: Observed vs Predicted"</span>,</span>
+<span id="cb105-12"><a href="#cb105-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed Log Mean Flow"</span>,</span>
+<span id="cb105-13"><a href="#cb105-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Predicted Log Mean Flow"</span>,</span>
+<span id="cb105-14"><a href="#cb105-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Mean Precipitation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab-05_files/figure-html/unnamed-chunk-49-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>answer: The final random forest tuned model has an root mean squared error of 0.36 and an R^2 of 0.902. The model underpredicts at higher observd log mean streamflow. I am curious to see how the model would change if fewer predictors were put into the model, rather than throwing the whole kitchen sink at it (minus predictors directly related to streamflow).</p>
+</blockquote>
 </section>
 </section>
 <section id="rubric" class="level1">
