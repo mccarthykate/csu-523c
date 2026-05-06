@@ -745,58 +745,265 @@ This question asks you to apply the full toolkit from Week 5 and Week 6: EDA, re
 
 ## Data prep & EDA (30) — *Week 5-1*
 
- - [ ] Set a seed for reproducibility
- - [ ] Use `skimr::skim()` and/or `visdat::vis_dat()` on your working data. Describe — in 3–4 sentences — what this tells you about missingness, variable types, and distributions. Use this to justify decisions you make in the recipe below.
- - [ ] Visualize the distribution of `q_mean` (and your chosen predictors) — note anything skewed, bimodal, or bounded that will drive a `step_*` choice.
- - [ ] *Optional but encouraged*: run `ape::Moran.I()` on each numeric predictor (Week 5-2 slide *"Which predictors carry geography?"*) to see which features carry spatial structure. High Moran's I = candidate geographic proxy to revisit in the VIP step.
- - [ ] Create an initial split with 75% used for training and 25% for testing. Consider whether stratification (e.g., by `aridity` quartile or hydrologic class) is appropriate and **explain your choice**.
- - [ ] Extract your training and testing sets
+ - [X] Set a seed for reproducibility
+ - [X] Use `skimr::skim()` and/or `visdat::vis_dat()` on your working data. Describe — in 3–4 sentences — what this tells you about missingness, variable types, and distributions. Use this to justify decisions you make in the recipe below.
+ - [X] Visualize the distribution of `q_mean` (and your chosen predictors) — note anything skewed, bimodal, or bounded that will drive a `step_*` choice.
+ - [X] *Optional but encouraged*: run `ape::Moran.I()` on each numeric predictor (Week 5-2 slide *"Which predictors carry geography?"*) to see which features carry spatial structure. High Moran's I = candidate geographic proxy to revisit in the VIP step.
+ - [X] Create an initial split with 75% used for training and 25% for testing. Consider whether stratification (e.g., by `aridity` quartile or hydrologic class) is appropriate and **explain your choice**.
+ - [X] Extract your training and testing sets
+ 
+```{r}
+library(skimr)
+#| output: false
+#set seed for reproducibility 
+set.seed(123) 
+
+library(skimr)
+
+#skim 
+skim(camels)
+```
+
+```{r}
+library(visdat)
+
+#visualize distribution of q_mean and chosen predictors 
+q_mean_dist <- ggplot(camels, aes(x = q_mean)) +
+  geom_histogram(bins = 25)
+
+q_mean_dist
+
+camels_vis <- camels %>% 
+  select(p_mean, pet_mean, frac_snow, aridity, elev_mean, slope_mean, frac_forest, soil_porosity, soil_conductivity, max_water_content, sand_frac, silt_frac, clay_frac) %>% 
+  pivot_longer(everything(), names_to = "variable", values_to = "value") %>%
+  ggplot(aes(x = value)) +
+  geom_histogram(bins = 25) +
+  facet_wrap(~variable, scales = "free") 
+camels_vis
+
+
+#check spatial autocorrelation using moran's I 
+model_camels <- camels %>% 
+  select(gauge_lon, gauge_lat,p_mean, pet_mean, frac_snow, aridity, elev_mean, slope_mean, frac_forest, soil_porosity, soil_conductivity, max_water_content, sand_frac, silt_frac, clay_frac) %>% 
+  drop_na() 
+  
+dists <- as.matrix(dist(model_camels %>% select(gauge_lon, gauge_lat)))
+
+dists_inv <- 1/dists
+
+diag(dists_inv) <- 0
+
+model_camels %>% 
+  select(-gauge_lon, -gauge_lat) %>% #drop lat and long because they will obvs have high spatial autocorrelation
+  map(~ape::Moran.I(., dists_inv)$observed) %>%
+  as_tibble() %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "morans_i") %>%
+  arrange(desc(morans_i))
+  
+#create 75/25 training/testing split 
+(resample_split <- initial_split(camels, prop = 0.75, strata = logQmean))
+
+#sanity check --> make sure 75/25 split actually occured 
+168/671
+
+#extract training and testing sets 
+model_camels_train <- training(resample_split)
+model_camels_test <- testing(resample_split)
+```
+
+> answer:  The data contains 53 numeric variables and 6 character variables. Some of the numeric data has missing values, particularly root_depth_50 and root_depth_99, which both have 24 missing values. However, because of the size of the dataset, these can be interpolated from the mean to fill in the N/As for these variables. Many of the numeric variables, particularly the ones related to discharge (Q) have right-skewed distributions, which can likely be log-transformed to increase linearity. When looking at the distribution of q_mean, the histogram demonstrates this right-skewed quality, so the output variable should be the log of q_mean. Aridity, mean elevation, fraction snow, mean precipitation, mean slope, and soil conductivity are all right-skewed, so they will need to be log-transformed. Stratification by logQmean was chosen so that the output variable is accurately represented. 
 
 ## Recipe (30) — *Week 5-1*
 
- - [ ] Define a formula you want to use to predict `logQmean`
- - [ ] In 5–7 sentences, justify your predictor choice. Consult the downloaded PDF; ground **each** recipe step (log, normalize, interact, naomit, impute, ...) in what the EDA above showed.
- - [ ] Build a recipe that handles those predictors. Your recipe should contain **at least three** `step_*` calls beyond the formula, and each should be there for a reason you can name.
+ - [X] Define a formula you want to use to predict `logQmean`
+ - [X] In 5–7 sentences, justify your predictor choice. Consult the downloaded PDF; ground **each** recipe step (log, normalize, interact, naomit, impute, ...) in what the EDA above showed.
+ - [X] Build a recipe that handles those predictors. Your recipe should contain **at least three** `step_*` calls beyond the formula, and each should be there for a reason you can name.
+ 
+```{r}
+recipe_obj <- recipe(logQmean ~ ., data = camels_train) %>%
+  step_rm(q_mean, runoff_ratio, slope_fdc, baseflow_index, stream_elas,q5, q95, high_q_freq, high_q_dur, low_q_freq, low_q_dur, zero_q_freq, hfd_mean, gauge_lat, gauge_lon, gauge_id, high_prec_timing, low_prec_timing, root_depth_50, root_depth_99, geol_porostiy, geol_1st_class, geol_2nd_class, dom_land_cover) %>% 
+  step_impute_mean() %>% 
+  step_log(aridity, elev_mean, p_mean, slope_mean, soil_conductivity) %>% 
+  step_normalize(all_predictors()) %>% 
+  step_naomit(all_predictors(), all_outcomes())
+```
+ 
+> answer: I chose to predict on aridiy, mean elevation, snow fraction, mean precipitation, mean slope, and soil conductivity. These were chosen because they all impact discharge, but don't have as much spatial correlation as featuers like longitude and latitude. I also chose to leave out any predictors directly related to discharge, such as mean discharge and runoff ratio. I attempted to minimize the number parameters while balancing the efficacy of the model. The exploratory data analysis revealed that aridity, mean elevation, snow fraction, mean precipitation, mean slope, and soil conductivity are skewed right, so a step_log function was used to redistribute the data. All predictors were transformed to a common scale using step_normalize, which ensures that all predictors contribute to the model equally, without magnitude impacting it. Laslty, na_omit was used to remove and N/As from predictors and outcomes. 
+
 
 ## Define 3 models (30) — *Week 6-1*
 
- - [ ] Define a random forest model using the `rand_forest` function (engine `ranger`, mode `regression`)
- - [ ] Define two other models of your choice. The Week 6-1 zoo (`linear_reg`, `boost_tree`, `svm_rbf`, `svm_poly`, `mlp`, `bag_mlp`, `decision_tree`) is a good menu — the comparison table in that deck summarizes strengths and weaknesses.
- - [ ] For each model, briefly note (one sentence) why it's a reasonable candidate for this regression problem — what kind of structure does it capture?
+ - [X] Define a random forest model using the `rand_forest` function (engine `ranger`, mode `regression`)
+ - [X] Define two other models of your choice. The Week 6-1 zoo (`linear_reg`, `boost_tree`, `svm_rbf`, `svm_poly`, `mlp`, `bag_mlp`, `decision_tree`) is a good menu — the comparison table in that deck summarizes strengths and weaknesses.
+ - [X] For each model, briefly note (one sentence) why it's a reasonable candidate for this regression problem — what kind of structure does it capture?
+ 
+```{r}
+#random forest
+rf_model_mine <- rand_forest() %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("regression")
+
+#xgboost
+xgb_model_mine <- boost_tree() %>% 
+  set_engine("xgboost") %>% 
+  set_mode("regression")
+
+#decision tree 
+dt_model_mine <- decision_tree() %>% 
+  set_engine("rpart") %>% 
+  set_mode("regression")
+```
+
+> answer: Random forest models construct multiple decision trees and aggregates predictions to improve accuracy and reduce overfitting. A boosted tree model use powerful machine learning method to improve predictive accuracy and reduce bias. Decision models have a flowchart-like structure and can capture non-linear relationships.   
 
 ## Workflow set — compare with *honest* CV (35) — *Week 5-2*
 
 With your preprocessing steps and models defined, build a `workflow_set` and compare the models across resamples. Because CAMELS basins are spatially distributed, a random `vfold_cv` can over-state performance if your model leans on geographic proximity — the Week 5-2 deck walks through this carefully, including when the gap is real and when it isn't.
 
- - [ ] Build a 10-fold `vfold_cv` **and** a `spatialsample::spatial_block_cv()` (or `spatial_clustering_cv()`) on the training data. You will need to `st_as_sf()` the training data using `gauge_lon`/`gauge_lat` (Week 5-2, *Applying this to your data*).
- - [ ] Fit your workflow set over **both** resampling schemes with `workflow_map("fit_resamples", ...)`
- - [ ] Use `autoplot()` and `rank_results()` to compare the models under each scheme
- - [ ] Describe the gap (5–7 sentences): which model wins, how much does performance drop when you move from random to spatial CV, and which number do you trust as your generalization estimate? What does the spread of per-fold metrics tell you about *where* your model struggles? Recall from lecture that a **small** gap is a signal that your predictors carry real transferable signal — not a failed diagnostic.
+ - [X] Build a 10-fold `vfold_cv` **and** a `spatialsample::spatial_block_cv()` (or `spatial_clustering_cv()`) on the training data. You will need to `st_as_sf()` the training data using `gauge_lon`/`gauge_lat` (Week 5-2, *Applying this to your data*).
+ - [X] Fit your workflow set over **both** resampling schemes with `workflow_map("fit_resamples", ...)`
+ - [X] Use `autoplot()` and `rank_results()` to compare the models under each scheme
+ - [X] Describe the gap (5–7 sentences): which model wins, how much does performance drop when you move from random to spatial CV, and which number do you trust as your generalization estimate? What does the spread of per-fold metrics tell you about *where* your model struggles? Recall from lecture that a **small** gap is a signal that your predictors carry real transferable signal — not a failed diagnostic.
+
+```{r}
+library(sf)
+library(spatialsample)
+
+camels_folds <- vfold_cv(camels_train, v = 10)
+
+camels_sf <- camels_train %>%
+  st_as_sf(coords = c("gauge_lon", "gauge_lat"),
+           crs = 4326, remove = FALSE)
+
+camels_block <- spatial_block_cv(camels_sf, v = 10)
+
+wf_set <- workflow_set(preproc = list(recipe_obj),
+                       models = list(rf_model_mine, 
+                                     xgb_model_mine, 
+                                     dt_model_mine))
+
+wf_random <- wf_set %>% 
+  workflow_map("fit_resamples", resamples = camels_folds)
+
+wf_spatial <- wf_set %>% 
+  workflow_map("fit_resamples", resamples = camels_block)
+
+autoplot(wf_random)
+
+autoplot(wf_spatial)
+
+rank_results(wf_random, rank_metric = "rmse", select_best = TRUE)
+
+rank_results(wf_spatial, rank_metric = "rmse", select_best = TRUE)
+
+autoplot(wf_random) / autoplot(wf_spatial)
+```
+
+> answer: With the rank metric being root mean squared error, the random forest model ranked first in the random CV and the boosted tree model came in first for the spatial CV. However, the random forest model ranks first when comparing R^2 values in both the random and spatial CV. When going from a random to a spatial CV, performance dropped about 0.07 rmse when comparing across models. This is a relatiely small gap, which indicates some spatial correlation. Because this gap between cross validations is so small, it signals that the predictors carry real transferable signal. 
+
 
 ## Tune the best model (25) — *Week 6-1*
 
- - [ ] Tag **at least two** hyperparameters with `tune()` in your chosen model specification
- - [ ] Build a named grid (e.g. `grid_space_filling()`, `grid_regular()`) — do not just pass an integer to `tune_grid()`. Justify your grid choice in one sentence.
- - [ ] Run `tune_grid()` against your **spatial** resamples with `control_grid(save_pred = TRUE)`
- - [ ] Show the tuning landscape with `autoplot()` and identify the best combination with `show_best()` / `select_best()`
- - [ ] In 2–3 sentences, describe which hyperparameters mattered most and what you learned about the model's sensitivity
+ - [X] Tag **at least two** hyperparameters with `tune()` in your chosen model specification
+ - [X] Build a named grid (e.g. `grid_space_filling()`, `grid_regular()`) — do not just pass an integer to `tune_grid()`. Justify your grid choice in one sentence.
+ - [X] Run `tune_grid()` against your **spatial** resamples with `control_grid(save_pred = TRUE)`
+ - [X] Show the tuning landscape with `autoplot()` and identify the best combination with `show_best()` / `select_best()`
+ - [X] In 2–3 sentences, describe which hyperparameters mattered most and what you learned about the model's sensitivity
+ 
+```{r}
+#chose random forest model because it ranked higher on most metrics (rmse for spatial and rsq overall)
+rf_tuned <- rand_forest(
+  mtry = tune(),
+  min_n = tune(),
+  trees = 1000) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("regression")
+
+#build workflow
+rf_tuned_wf <- workflow() %>%
+  add_recipe(recipe_obj) %>%
+  add_model(rf_tuned)
+
+#build grid
+rf_tuned_grid <- grid_space_filling(
+  mtry(range = c(2, 11)),
+  min_n(range = c(2, 20)),
+  size = 20)
+
+#tune against spatial CV
+rf_tuned_spatial <- tune_grid(rf_tuned,
+  preprocessor = recipe_obj,
+  resamples = camels_block,
+  grid = rf_tuned_grid,
+  control = control_grid(save_pred = TRUE))
+
+autoplot(rf_tuned_spatial)
+
+show_best(rf_tuned_spatial, metric = "rsq")
+select_best(rf_tuned_spatial, metric = "rsq")
+```
+ 
+> answer: The best hyperparameter combination was mtry = 11 and min_n = 5, which resulted in a rsq of .876. It looks like the model is sensitive to the mtry parameter compared to min_n. 
 
 ## Variable importance (25) — *Week 5-2*
 
- - [ ] Produce a `vip::vip()` plot for your tuned model (pattern: `extract_fit_parsnip() |> vip()`)
+ - [X] Produce a `vip::vip()` plot for your tuned model (pattern: `extract_fit_parsnip() |> vip()`)
  - [ ] Interpret the top predictors (4–6 sentences). Cross-reference against the predictor Moran's I you computed in EDA — are any of the top VIP features *also* highly spatially autocorrelated? If so, they could be acting as **geographic proxies** — discuss whether the importance reflects *mechanism* or *location* (Week 5-2, Part 4).
- - [ ] If the model you chose cannot provide VIP, instead discuss the interpretability trade-off you accepted and how you would diagnose the same question (permutation importance via `vip::vi_permute()`, partial dependence, etc.).
+ - [X] If the model you chose cannot provide VIP, instead discuss the interpretability trade-off you accepted and how you would diagnose the same question (permutation importance via `vip::vi_permute()`, partial dependence, etc.).
+ 
+```{r}
+#select best parameters 
+best_params <- select_best(rf_tuned_spatial, metric = "rsq")
+
+#use best parameters to finalize wf 
+final_wf <- finalize_workflow(rf_tuned_wf, best_params)
+
+#fit on training data
+final_fit <- fit(final_wf, data = camels_train)
+
+#vip plot
+final_fit %>%
+  extract_fit_parsnip() %>%
+  vip(num_features = 20) +
+  labs(title = "VIP Plot") 
+```
+ 
+> answer: The top predictors in terms of importance were mean precipitation, aridity, low precipitation freqency. This makes sense because precipitation and aridity affect the amount of water in a stream. However, these predictors are spatially correlated in the US, with wetter regions in the east and drier regions in the west. Soil predictors rank relatively low (soil depth, percent clay), with percent sand and percent silt not even making the top 20 in terms of variable importance. 
 
 ## Final fit & evaluate (25) — *Week 6-1*
 
 Use the canonical tidymodels closing move (Week 6-1, *The final fit!*):
 
  - [ ] `finalize_workflow()` your tuned workflow with the best hyperparameters
- - [ ] Run `last_fit()` against your original `initial_split()` object — this trains on the full training set and evaluates on the held-out test set in one call
- - [ ] Use `collect_metrics()` and `collect_predictions()` to report final test-set performance
- - [ ] Create a plot of observed vs predicted `logQmean` on the **test set** with clear title, axis labels, and a compelling color scale (e.g., colored by aridity or region). Include a 1:1 reference line.
- - [ ] In 3–5 sentences, describe what you think of the results — including how the test-set metrics compare to your spatial-CV estimate, where the model under- or over-predicts, and what you'd investigate next.
+ - [X] Run `last_fit()` against your original `initial_split()` object — this trains on the full training set and evaluates on the held-out test set in one call
+ - [X] Use `collect_metrics()` and `collect_predictions()` to report final test-set performance
+ - [X] Create a plot of observed vs predicted `logQmean` on the **test set** with clear title, axis labels, and a compelling color scale (e.g., colored by aridity or region). Include a 1:1 reference line.
+ - [X] In 3–5 sentences, describe what you think of the results — including how the test-set metrics compare to your spatial-CV estimate, where the model under- or over-predicts, and what you'd investigate next.
 
+```{r}
+final_wf <- finalize_workflow(rf_tuned_wf, best_params)
+
+final_last_fit <- last_fit(final_wf, camels_split)
+
+collect_metrics(final_last_fit)
+
+#make plot 
+collect_predictions(final_last_fit) %>%
+  bind_cols(testing(camels_split) %>%
+              select(p_mean)) %>%
+  ggplot(aes(x = logQmean, y = .pred, color = p_mean)) +
+  scale_color_viridis_c() +
+  geom_point() +
+  geom_abline(linetype = "dashed") +
+  geom_smooth(method = "lm", color = "red3", se = FALSE) +
+  theme_linedraw() +
+  labs(title = "Log Mean Streamflow: Observed vs Predicted",
+       x = "Observed Log Mean Flow",
+       y = "Predicted Log Mean Flow",
+       color = "Mean Precipitation")
+```
+
+> answer: The final random forest tuned model has an root mean squared error of 0.36 and an R^2 of 0.902. The model underpredicts at higher observd log mean streamflow. I am curious to see how the model would change if fewer predictors were put into the model, rather than throwing the whole kitchen sink at it (minus predictors directly related to streamflow). 
 
 # Rubric
 
