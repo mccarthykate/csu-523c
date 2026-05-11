@@ -177,7 +177,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modeltime)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(timetk)</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)   <span class="co"># for stationarity tests</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(earth) <span class="co">#to use earth engine when building models </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(earth) <span class="co">#to use earth engine when building models </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(prophet)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="getting-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="getting-the-data">Getting the Data</h2>
@@ -378,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>Model agreement</strong>: Do ARIMA and Prophet project similar trajectories? If they diverge, what does that tell you about their different assumptions (statistical stationarity vs.&nbsp;flexible trend)?</li>
 </ol>
 <blockquote class="blockquote">
-<p>answer:</p>
+<p>answer: ARIMA and Prophet models follow seasonal trends and they project similar trajectories. Notably, the prophet with regressors, ARIMA with XGBoost, and the regression with ARIMA predict similarly, with the prophet with XGboost diverging slightly.</p>
 </blockquote>
 <ol start="2" type="1">
 <li><strong>Forecast quality</strong>: Which model would you recommend to CWCB for water-supply planning? Justify with your accuracy metrics.</li>

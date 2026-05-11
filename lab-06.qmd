@@ -39,6 +39,7 @@ library(modeltime)
 library(timetk)
 library(tseries)   # for stationarity tests
 library(earth) #to use earth engine when building models 
+library(prophet)
 ```
 
 ## Getting the Data
@@ -292,7 +293,9 @@ pf_tbl <- pf |>
 
 future_tbl <- future |>
   as_tibble() |>
-  mutate(date = as.Date(Date), Date = NULL)
+  mutate(date = as.Date(Date), Date = NULL) %>% 
+  na.omit() #added NA omit because prophet models weren't predicting due to one NA value 
+
 ```
 
 ### Train / Test Split
@@ -465,7 +468,7 @@ Examine your 10-year forecast and reflect on the following:
 
 1. **Model agreement**: Do ARIMA and Prophet project similar trajectories? If they diverge, what does that tell you about their different assumptions (statistical stationarity vs. flexible trend)?
 
-> answer:  
+> answer: ARIMA and Prophet models follow seasonal trends and they project similar trajectories. Notably, the prophet with regressors, ARIMA with XGBoost, and the regression with ARIMA predict similarly, with the prophet with XGboost diverging slightly. 
 
 2. **Forecast quality**: Which model would you recommend to CWCB for water-supply planning? Justify with your accuracy metrics.
 
