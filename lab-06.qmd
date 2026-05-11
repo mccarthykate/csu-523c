@@ -38,6 +38,7 @@ library(feasts)
 library(modeltime)
 library(timetk)
 library(tseries)   # for stationarity tests
+library(earth) #to use earth engine when building models 
 ```
 
 ## Getting the Data
@@ -234,12 +235,16 @@ log_flow_vec <- log1p(pf$Flow)
 
 # ADF: H0 = non-stationary; p < 0.05 rejects non-stationarity → series IS stationary
 adf.test(log_flow_vec)
+# series is stationary
 
 # KPSS: H0 = stationary; p < 0.05 rejects stationarity → series is NOT stationary
 kpss.test(log_flow_vec)
+#series is not stationary 
 ```
 
 What do the tests tell you? If the series is non-stationary, ARIMA will need `d ≥ 1` (differencing). Does the lag plot support the same conclusion?
+
+> answer: The ADF test had a p-value lower than 0.01 (R couldn't print the smaller value), which means the null hypothesis is rejected and the series is stationary. However, the KPSS test has a p-value of 0.04, which also means the null hypothesis is rejects, but the series in non-stationary. The lag plot supports the KPSS test that the series in non-stationary because there isn't a linear relationship. 
 
 ## 5. Decomposition
 
@@ -258,8 +263,13 @@ autoplot(decomp)
 Describe what you see:
 
 - What does the **trend** tell you about long-term changes in Poudre flow? Is there evidence of a decline consistent with climate change or upstream demand?
+> answer: The trend graph depicts that there is a decrease in flow since about 2016 and has been hovering aroung 200 cfs in recent years. This demonstrates a decline in flow that is consistent with climate change (reduced snowpack) and upstream demand (more water scarcity). 
+
 - What drives the **seasonal** component? (Hint: snowmelt, irrigation withdrawals, reservoir releases)
+> answer: The seasonal component is driven by water supply management and processes that occur on a yearly scale. Snowmelt in spring drives the peak flow in May/June. Withdrawals for irrigation during the summer months cause the decrease in flow as people are using more water than is being added, especially as snowmelt season ends. 
+
 - Are there any spikes in the **remainder** that correspond to anomalous years you can identify?
+> answer: In the remainder graph, we can see spikes responding to big rain storms and floods that could otherwise impact the overall flow in the Cache la Poudre. For example, there is a peak in the fall of 2013, which corresponds to the Front Range floods in September, 2013. There was also flooding in June of 2015, which can be seen in a spike on the graph. 
 
 ---
 
@@ -363,6 +373,8 @@ Describe what you see. Use these benchmarks to interpret the numbers:
 - **RMSE** — penalizes large errors heavily; compare to mean test-period flow for context
 - Do boosted models (ARIMA-boost, Prophet-boost) outperform their base versions? If so, the nonlinear climate signal is worth capturing.
 
+> answer: All six of the models beat a naïve seasonal forecase because they all have MASE values less than 1. The Earth model predicted the best across each of the benchmarks, with the lowest RMSE and MASE values, and highest R^2 values. Boosted models did *not* outperform their base versions. 
+
 ### Test Set Forecast
 
 Forecast over the held-out test period and compare predictions to actuals. Back-transform with `expm1()` to return predictions to cfs. Two details matter: (1) `expm1(x)` is the exact inverse of `log1p(x)` and always returns values ≥ 0; (2) confidence interval lower bounds on the log scale can be slightly negative — floor them at 0 with `pmax(.conf_lo, 0)` *before* back-transforming so the ribbon never dips below zero cfs:
@@ -395,6 +407,8 @@ test_forecast |>
 
 Do predictions track actuals during the 2022–2023 test window? Are confidence intervals capturing observed values? Note any discontinuities at the 2022 boundary between training and test.
 
+> answer: Predictions track actuals decently well during the 2022-23 test window. It seems as though the ARIMA regression model is consistently underpredicting flow during the test window. Overall, most model predictions tracked actuals well in 2023, struggling more to predict in 2022. There are slight dicontinuities at the 2022 boundary between training and test, with models jumping a little lower at the start of 2022 rather than smoothly transitioning from the training period. 
+
 ### Refit to Full Dataset
 
 Refit all models to the complete 2013–2023 record before forecasting forward. Refitting allows auto-tuned models (`auto.arima`, `ets`) to re-optimize their parameters with more data:
@@ -410,6 +424,8 @@ modeltime_accuracy(refit_tbl) |>
 ```
 
 Do the accuracy metrics change after refitting? Why or why not?
+
+> answer: The accuracy metrics did not change after refitting. This might be due to the model not find any patterns and thus have not learned anything after the refit. 
 
 ### Forecast into the Future (2024–2033)
 
@@ -449,13 +465,23 @@ Examine your 10-year forecast and reflect on the following:
 
 1. **Model agreement**: Do ARIMA and Prophet project similar trajectories? If they diverge, what does that tell you about their different assumptions (statistical stationarity vs. flexible trend)?
 
+> answer:  
+
 2. **Forecast quality**: Which model would you recommend to CWCB for water-supply planning? Justify with your accuracy metrics.
+
+> answer: I would recommend CWCB use the Earth model. It looks like this model captures the most variance in flow, but with only two years of a testing window, it's hard to determine how accurate the variance the model predicts will be. Moreover, the Earth model had the best accuracy accross all metrics, according to the metrics table. 
 
 3. **Negative predictions**: If any model predicts negative flow, explain why this happens and what you would do to fix it in a production context (hint: log-transformation of Flow before modeling).
 
+> answer: No models predict negative flow. 
+
 4. **Regressor value**: The MACA climate projections assume a specific emissions scenario. How does uncertainty in those projections propagate into your streamflow forecast?
 
+> answer: Depending on the amount and composition of emissions created in the next 10 years, the MACA climate predicts could be under/over predicting their impacts. This uncertainty can propogate into streamflow forecasts because temperature and precipitation are correlated with streamflow. 
+
 5. **Improvement path**: What information not in `tmax`, `ppt`, `srad` would most improve this forecast? (Consider: snowpack, upstream storage, irrigation demand.)
+
+> answer: I think snowpack, irrigation demand, and reservior releases can all be added to the models to improve the forecast. These are important aspects of water supply and can help explain the variance year-to-year outside of the seasonal and long-term trends. If I had to choose only one, I think snowpack alone would most improve this forecast because it's what controls the timing and level of the late-spring peakflow. 
 
 At this stage you have a working end-to-end time series forecasting pipeline — the same structural approach used by CWCB, USBR, and state water agencies for operational planning. The processes you learned in `tidymodels` apply directly here, and you can extend this framework with cross-validation (`time_series_cv()`), feature engineering (lag variables, rolling means), and hyperparameter tuning.
 
